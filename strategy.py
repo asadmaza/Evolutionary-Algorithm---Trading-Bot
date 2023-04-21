@@ -61,6 +61,13 @@ class Strategy():
     '''
     self.indicators = [Strategy.INDICATORS[i](self.close, **self.params[i]) for i in range(Strategy.NUM_INDICATORS)]
 
+  def to_json(self):
+    return {
+      'params': self.params,
+      'buy_weights': self.buy_weights,
+      'sell_weights': self.sell_weights
+    }
+
   def buy_sum(self, t: int) -> float:
     '''
     Return buy_weighted sum of indicators at time period t
@@ -182,7 +189,7 @@ if __name__ == '__main__':
   # -------------------------------
 
   strat = Strategy(ohlcv, params, buy_weights, sell_weights) # simple strategy
-  
+
   fitness = strat.evaluate(verbose=True)
   print(f'\nFinal balance {fitness:.2f} USD')
   
