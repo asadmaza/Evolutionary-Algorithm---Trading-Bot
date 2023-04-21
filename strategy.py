@@ -1,35 +1,89 @@
 '''
-Simple Strategy:
-- Buy when exponential moving average (EMA) overtakes smooth moving average (SMA) 
-- Sell when SMA overtakes EMA
-
-TODO
-- Convert this SimpleStrategy class into a general Strategy class that can change its strategy based on its parameters
+A Strategy that triggers
+- a buy when the buy_weighted sum of indicators turns from negative to positive
+- a sell when the sell_weighted sum of indicators turns from negative to positive
 
 Questions for lab facilitator:
 - Is 720, 1 day data points all that is required to evolve strategy?
 - Why is price between 0.26-1.24 as opposed to around $30,000 USD?
 '''
 
-import ta
 import pandas as pd
 from matplotlib import pyplot as plt
+import ta
 
-class SimpleStrategy():
+class Strategy():
 
-  def __init__(self, ohlcv: pd.DataFrame, sma_window: int = 20, ema_window: int = 10) -> None:
+  # callables that take close as first parameter and return a pandas Series
+  INDICATORS = [
+    ta.trend.sma_indicator,
+    ta.trend.ema_indicator,
+    # ... simply add more indicators
+  ]
+
+  NUM_INDICATORS = len(INDICATORS)
+
+  def __init__(
+      self,
+      ohlcv: pd.DataFrame,
+      params: list[dict],
+      buy_weights: list[float],
+      sell_weights: list[float]
+    ) -> None:
     '''
     Parameters
     ----------
       ohlcv : pandas.DataFrame
         A DataFrame containing ohlcv candle data.
+
+      params : list[dict]
+        A list of dicts, where each dict contains the keyword arguments to pass to the corresponding indicator.
+
+      buy_weights : list[float]
+        A list of weights to be applied to each indicator in the buy sum.
+
+      sell_weights : list[float]
+        A list of weights to be applied to each indicator in the sell sum.
     '''
 
-    self.close_prices = ohlcv.iloc[:, 4]
+    self.ohlcv = ohlcv
+    self.close = self.ohlcv.iloc[:, 4] # 5th column is close price
 
-    # indicators
-    self.sma = ta.trend.sma_indicator(self.close_prices, sma_window)
-    self.ema = ta.trend.ema_indicator(self.close_prices, ema_window)
+    self.params = params
+    self.buy_weights = buy_weights
+    self.sell_weights = sell_weights
+
+    self.set_indicators()
+
+  def set_indicators(self):
+    '''
+    Reset the indicators with current params
+    '''
+    self.indicators = [Strategy.INDICATORS[i](self.close, **self.params[i]) for i in range(Strategy.NUM_INDICATORS)]
+
+  def buy_sum(self, t: int) -> float:
+    '''
+    Return buy_weighted sum of indicators at time period t
+
+    Parameters
+    ----------
+    t : int
+      The time period to assess. Assumed to be within [1, len(self.close)]
+    '''
+
+    return sum([self.buy_weights[i] * self.indicators[i][t] for i in range(Strategy.NUM_INDICATORS)])
+
+  def sell_sum(self, t: int) -> float:
+    '''
+    Return sell_weighted sum of indicators at time period t
+
+    Parameters
+    ----------
+    t : int
+      The time period to assess. Assumed to be within [1, len(self.close)]
+    '''
+
+    return sum([self.sell_weights[i] * self.indicators[i][t] for i in range(Strategy.NUM_INDICATORS)])
 
   def buy_trigger(self, t: int) -> bool:
     '''
@@ -38,10 +92,10 @@ class SimpleStrategy():
     Parameters
     ----------
     t : int
-      The time period to assess. Assumed to be within [1, len(self.close_prices)]
+      The time period to assess. Assumed to be within [1, len(self.close)]
     '''
 
-    return self.ema[t] > self.sma[t] and self.ema[t-1] <= self.sma[t-1]
+    return self.buy_sum(t) > 0 and self.buy_sum(t-1) <= 0
   
   def sell_trigger(self, t: int) -> bool:
     '''
@@ -50,10 +104,10 @@ class SimpleStrategy():
     Parameters
     ----------
     t : int
-      The time period to assess. Assumed to be within [1, len(self.close_prices)]
+      The time period to assess. Assumed to be within [1, len(self.close)]
     '''
 
-    return self.sma[t] > self.ema[t] and self.sma[t-1] <= self.ema[t-1]
+    return self.sell_sum(t) > 0 and self.sell_sum(t-1) <= 0
 
   def evaluate(self, verbose: bool = False) -> float:
     '''
@@ -63,22 +117,22 @@ class SimpleStrategy():
     usd = 1
     bitcoin = 0
 
-    for t in range(1, len(self.close_prices)):
+    for t in range(1, len(self.close)):
 
       if self.buy_trigger(t):
-        bitcoin += usd / self.close_prices[t]
-        if verbose: print(f'Bought {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close_prices[t]:4.2f}')
+        bitcoin += usd / self.close[t]
+        if verbose: print(f'Bought {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close[t]:4.2f}')
         usd = 0
 
       elif bitcoin and self.sell_trigger(t): # must buy before selling
-        usd += bitcoin * self.close_prices[t]
-        if verbose: print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close_prices[t]:4.2f}')
+        usd += bitcoin * self.close[t]
+        if verbose: print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close[t]:4.2f}')
         bitcoin = 0
 
     # if haven't sold, sell in last time period
     if bitcoin:
-      usd += bitcoin * self.close_prices.iloc[-1]
-      if verbose: print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close_prices.iloc[-1]:4.2f}')
+      usd += bitcoin * self.close.iloc[-1]
+      if verbose: print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close.iloc[-1]:4.2f}')
 
     return usd
   
@@ -87,41 +141,52 @@ class SimpleStrategy():
     Graph the close prices, the Strategy's indicators, and the buy and sell points. Block until figure is closed.
     '''
     
-    plt.plot(self.close_prices, color='grey', label='Close price')
-    plt.plot(self.sma, color='blue', label='SMA')
-    plt.plot(self.ema, color ='orange', label='EMA')
+    plt.plot(self.close, label='Close price')
+    for i in range(Strategy.NUM_INDICATORS): plt.plot(self.indicators[i], label=Strategy.INDICATORS[i].__name__)
 
     bought, sold = 0, 0
 
-    for t in range(1, len(self.close_prices)):
+    for t in range(1, len(self.close)):
 
         if self.buy_trigger(t):
-            plt.plot((t), (self.close_prices[t]), 'o', color='red', label='Buy' if not bought else '')
+            plt.plot((t), (self.close[t]), 'o', color='red', label='Buy' if not bought else '')
             bought += 1
 
         elif bought and self.sell_trigger(t): # must buy before selling
-            plt.plot((t), (self.close_prices[t]), 'o', color='green', label='Sell' if not sold else '')
+            plt.plot((t), (self.close[t]), 'o', color='green', label='Sell' if not sold else '')
             sold += 1
 
     # if haven't sold, sell in last time period
     if bought > sold:
-      plt.plot((len(self.close_prices)-1), (self.close_prices.iloc[-1]), 'o', color='green', label='Sell' if not sold else '')
+      plt.plot((len(self.close)-1), (self.close.iloc[-1]), 'o', color='green', label='Sell' if not sold else '')
 
     plt.legend()
     plt.show(block=True)
-
 
 if __name__ == '__main__':
   import ccxt
 
   MARKET = 'BIT/USD'
-  TIMEFRAME = '30m'
+  TIMEFRAME = '1d'
 
   kraken = ccxt.kraken()
   ohlcv = pd.DataFrame(kraken.fetch_ohlcv(MARKET, TIMEFRAME))
 
-  strat = SimpleStrategy(ohlcv)
+  # --- imitate simple strategy ---
+  params = [
+    {'window': 20}, # SMA
+    {'window': 10}, # EMA
+  ]
+  buy_weights = [-1, 1]
+  sell_weights = [1, -1]
+  # -------------------------------
+
+  strat = Strategy(ohlcv, params, buy_weights, sell_weights) # simple strategy
   
-  strat.evaluate(verbose=True)
+  fitness = strat.evaluate(verbose=True)
+  print(f'\nFinal balance {fitness:.2f} USD')
+  
   strat.graph()
+
+
 
