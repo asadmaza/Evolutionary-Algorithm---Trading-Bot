@@ -1,3 +1,15 @@
+'''
+Simple trading bot
+
+Strategy:
+- Buy when exponential moving average (EMA) overtakes smooth moving average (SMA) 
+- Sell when SMA overtakes EMA
+
+Questions for lab facilitator:
+- Is 720, 1 day data points all that is required to evolve strategy?
+- Why is price between 0.26-1.24 as opposed to around $30,000 USD?
+'''
+
 import ccxt
 import ta
 import pandas as pd
