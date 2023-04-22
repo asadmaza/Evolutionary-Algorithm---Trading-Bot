@@ -1,7 +1,7 @@
 '''
-A Strategy that triggers
-- a buy when the buy_weighted sum of indicators turns from negative to positive
-- a sell when the sell_weighted sum of indicators turns from negative to positive
+A Strategy that triggers:
+- a buy when the buy_weighted sum of indicators turns from negative to positive.
+- a sell when the sell_weighted sum of indicators turns from negative to positive.
 
 Questions for lab facilitator:
 - Is 720, 1 day data points all that is required to evolve strategy?
@@ -11,6 +11,11 @@ Questions for lab facilitator:
 import pandas as pd
 from matplotlib import pyplot as plt
 import ta
+import random
+import copy
+import json
+
+random.seed()
 
 class Strategy():
 
@@ -20,21 +25,14 @@ class Strategy():
     ta.trend.ema_indicator,
     # ... simply add more indicators
   ]
-
   NUM_INDICATORS = len(INDICATORS)
 
-  def __init__(
-      self,
-      ohlcv: pd.DataFrame,
-      params: list[dict],
-      buy_weights: list[float],
-      sell_weights: list[float]
-    ) -> None:
+  def __init__(self, candles: pd.DataFrame, params: list[dict], buy_weights: list[float], sell_weights: list[float]) -> None:
     '''
     Parameters
     ----------
-      ohlcv : pandas.DataFrame
-        A DataFrame containing ohlcv candle data.
+      candles : pandas.DataFrame
+        A DataFrame containing ohlcv data.
 
       params : list[dict]
         A list of dicts, where each dict contains the keyword arguments to pass to the corresponding indicator.
@@ -46,8 +44,8 @@ class Strategy():
         A list of weights to be applied to each indicator in the sell sum.
     '''
 
-    self.ohlcv = ohlcv
-    self.close = self.ohlcv.iloc[:, 4] # 5th column is close price
+    self.candles = candles
+    self.close = self.candles.iloc[:, 4] # 5th column is close price
 
     self.params = params
     self.buy_weights = buy_weights
@@ -57,37 +55,30 @@ class Strategy():
 
   def set_indicators(self):
     '''
-    Reset the indicators with current params
+    Reset the indicators with current params.
     '''
     self.indicators = [Strategy.INDICATORS[i](self.close, **self.params[i]) for i in range(Strategy.NUM_INDICATORS)]
 
-  def to_json(self):
-    return {
-      'params': self.params,
-      'buy_weights': self.buy_weights,
-      'sell_weights': self.sell_weights
-    }
-
   def buy_sum(self, t: int) -> float:
     '''
-    Return buy_weighted sum of indicators at time period t
+    Return buy_weighted sum of indicators at time period t.
 
     Parameters
     ----------
-    t : int
-      The time period to assess. Assumed to be within [1, len(self.close)]
+      t : int
+        The time period to assess. Assumed to be within [1, len(self.close)].
     '''
 
     return sum([self.buy_weights[i] * self.indicators[i][t] for i in range(Strategy.NUM_INDICATORS)])
 
   def sell_sum(self, t: int) -> float:
     '''
-    Return sell_weighted sum of indicators at time period t
+    Return sell_weighted sum of indicators at time period t.
 
     Parameters
     ----------
-    t : int
-      The time period to assess. Assumed to be within [1, len(self.close)]
+      t : int
+        The time period to assess. Assumed to be within [1, len(self.close)].
     '''
 
     return sum([self.sell_weights[i] * self.indicators[i][t] for i in range(Strategy.NUM_INDICATORS)])
@@ -98,8 +89,8 @@ class Strategy():
 
     Parameters
     ----------
-    t : int
-      The time period to assess. Assumed to be within [1, len(self.close)]
+      t : int
+        The time period to assess. Assumed to be within [1, len(self.close)].
     '''
 
     return self.buy_sum(t) > 0 and self.buy_sum(t-1) <= 0
@@ -110,15 +101,18 @@ class Strategy():
 
     Parameters
     ----------
-    t : int
-      The time period to assess. Assumed to be within [1, len(self.close)]
+      t : int
+        The time period to assess. Assumed to be within [1, len(self.close)].
     '''
 
     return self.sell_sum(t) > 0 and self.sell_sum(t-1) <= 0
 
   def evaluate(self, verbose: bool = False) -> float:
     '''
-    Return the fitness of the Strategy, which is defined as the USD remaining after starting with $1 USD, buying and selling at each trigger in the timeframe, and selling in the last time period.
+    Return the fitness of the Strategy, which is defined as the USD remaining after:
+    - starting with $1 USD,
+    - buying and selling at each trigger in the timeframe, and
+    - selling in the last time period.
     '''
 
     usd = 1
@@ -143,9 +137,54 @@ class Strategy():
 
     return usd
   
+  def mutate(self) -> 'Strategy':
+    '''
+    Return a new Strategy with randomly mutated params.
+    
+    Initial strategy:
+    - multiply each param by either 0.9 or 1.1 and cast to int.
+    '''
+
+    mults = [0.9, 1.1]
+    params = copy.deepcopy(self.params)
+
+    for kwargs in params:
+      for k, v in kwargs.items():
+        kwargs[k] = int(v * random.choice(mults))
+
+    return Strategy(self.candles, params, self.buy_weights, self.sell_weights)
+  
+  def to_json(self) -> dict:
+    '''
+    Return a dict of the minimum data needed to represent this strategy.
+    '''
+
+    return {'params': self.params, 'buy_weights': self.buy_weights, 'sell_weights': self.sell_weights}
+  
+  @classmethod
+  def from_json(self, candles: pd.DataFrame, filename: str, n: int = 1) -> list['Strategy']:
+    '''
+    Return a list of n Strategy objects from json file data.
+
+    Parameters
+    ----------
+      candles : pandas.DataFrame
+        A DataFrame containing ohlcv data.
+
+      filename : str
+        Name of json file.
+
+      n : int
+        Number of Strategies to read from file.
+    '''
+
+    with open(filename, 'r') as f:
+      data = json.load(f)
+      return [Strategy(candles, *d.values()) for d in data]
+
   def graph(self) -> None:
     '''
-    Graph the close prices, the Strategy's indicators, and the buy and sell points. Block until figure is closed.
+    Graph the close prices, the strategy's indicators, and the buy and sell points. Block until figure is closed.
     '''
     
     plt.plot(self.close, label='Close price')
@@ -171,13 +210,13 @@ class Strategy():
     plt.show(block=True)
 
 if __name__ == '__main__':
-  import ccxt
+  '''
+  Testing
+  '''
+  
+  from candles import get_candles
 
-  MARKET = 'BIT/USD'
-  TIMEFRAME = '1d'
-
-  kraken = ccxt.kraken()
-  ohlcv = pd.DataFrame(kraken.fetch_ohlcv(MARKET, TIMEFRAME))
+  candles = get_candles()
 
   # --- imitate simple strategy ---
   params = [
@@ -188,12 +227,10 @@ if __name__ == '__main__':
   sell_weights = [1, -1]
   # -------------------------------
 
-  strat = Strategy(ohlcv, params, buy_weights, sell_weights) # simple strategy
+  filename = 'results/best.json'
+  strat = Strategy.from_json(candles, filename)[0]
 
-  fitness = strat.evaluate(verbose=True)
-  print(f'\nFinal balance {fitness:.2f} USD')
+  fitness = strat.evaluate()
+  print(f'Final balance {fitness:.2f} USD')
   
   strat.graph()
-
-
-
