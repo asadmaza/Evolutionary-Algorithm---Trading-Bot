@@ -19,7 +19,7 @@ random.seed()
 
 class Strategy():
 
-  # callables that take close as first parameter and return a pandas Series
+  # callables that take close Series as first parameter and return a indicator Series
   INDICATORS = [
     ta.trend.sma_indicator,
     ta.trend.ema_indicator,
@@ -51,13 +51,9 @@ class Strategy():
     self.buy_weights = buy_weights
     self.sell_weights = sell_weights
 
-    self.set_indicators()
-
-  def set_indicators(self):
-    '''
-    Reset the indicators with current params.
-    '''
     self.indicators = [Strategy.INDICATORS[i](self.close, **self.params[i]) for i in range(Strategy.NUM_INDICATORS)]
+
+    self.fitness = self.evaluate() # evaluate fitness once on init
 
   def buy_sum(self, t: int) -> float:
     '''
@@ -107,34 +103,56 @@ class Strategy():
 
     return self.sell_sum(t) > 0 and self.sell_sum(t-1) <= 0
 
-  def evaluate(self, verbose: bool = False) -> float:
+  def evaluate(self, graph: bool = False) -> float:
     '''
     Return the fitness of the Strategy, which is defined as the USD remaining after:
     - starting with $1 USD,
     - buying and selling at each trigger in the timeframe, and
     - selling in the last time period.
+
+    Parameters
+    ----------
+      graph : bool
+        Also plot the close price, indicators, and buy and sell points and block execution
     '''
+
+    if graph:
+      plt.plot(self.close, label='Close price')
+      for i in range(Strategy.NUM_INDICATORS): plt.plot(self.indicators[i], label=Strategy.INDICATORS[i].__name__)
 
     usd = 1
     bitcoin = 0
+    bought, sold = 0, 0
 
     for t in range(1, len(self.close)):
 
       if self.buy_trigger(t):
         bitcoin += usd / self.close[t]
-        if verbose: print(f'Bought {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close[t]:4.2f}')
+        if graph:
+          print(f'Bought {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close[t]:4.2f}')
+          plt.plot((t), (self.close[t]), 'o', color='red', label='Buy' if not bought else '')
         usd = 0
+        bought += 1
 
       elif bitcoin and self.sell_trigger(t): # must buy before selling
         usd += bitcoin * self.close[t]
-        if verbose: print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close[t]:4.2f}')
+        if graph:
+          print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close[t]:4.2f}')
+          plt.plot((t), (self.close[t]), 'o', color='green', label='Sell' if not sold else '')
         bitcoin = 0
+        sold += 1
 
     # if haven't sold, sell in last time period
     if bitcoin:
       usd += bitcoin * self.close.iloc[-1]
-      if verbose: print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close.iloc[-1]:4.2f}')
+      if graph:
+        print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close.iloc[-1]:4.2f}')
+        plt.plot((len(self.close)-1), (self.close.iloc[-1]), 'o', color='green', label='Sell' if not sold else '')
 
+    if graph:
+      plt.legend()
+      plt.show(block=True)
+    
     return usd
   
   def mutate(self) -> 'Strategy':
@@ -182,33 +200,6 @@ class Strategy():
       data = json.load(f)
       return [Strategy(candles, *d.values()) for d in data]
 
-  def graph(self) -> None:
-    '''
-    Graph the close prices, the strategy's indicators, and the buy and sell points. Block until figure is closed.
-    '''
-    
-    plt.plot(self.close, label='Close price')
-    for i in range(Strategy.NUM_INDICATORS): plt.plot(self.indicators[i], label=Strategy.INDICATORS[i].__name__)
-
-    bought, sold = 0, 0
-
-    for t in range(1, len(self.close)):
-
-        if self.buy_trigger(t):
-            plt.plot((t), (self.close[t]), 'o', color='red', label='Buy' if not bought else '')
-            bought += 1
-
-        elif bought and self.sell_trigger(t): # must buy before selling
-            plt.plot((t), (self.close[t]), 'o', color='green', label='Sell' if not sold else '')
-            sold += 1
-
-    # if haven't sold, sell in last time period
-    if bought > sold:
-      plt.plot((len(self.close)-1), (self.close.iloc[-1]), 'o', color='green', label='Sell' if not sold else '')
-
-    plt.legend()
-    plt.show(block=True)
-
 if __name__ == '__main__':
   '''
   Testing
@@ -227,10 +218,10 @@ if __name__ == '__main__':
   sell_weights = [1, -1]
   # -------------------------------
 
-  filename = 'results/best.json'
-  strat = Strategy.from_json(candles, filename)[0]
+  strat1 = Strategy(candles, params, buy_weights, sell_weights)
+  print(f'Strategy 1 fitness {strat1.evaluate():.2f}')
 
-  fitness = strat.evaluate()
-  print(f'Final balance {fitness:.2f} USD')
-  
-  strat.graph()
+  filename = 'results/best.json'
+  strat2 = Strategy.from_json(candles, filename)[0]
+
+  fitness = strat2.evaluate(graph=True)

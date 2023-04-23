@@ -5,6 +5,8 @@ Run a tournament to find the best Strategy through evolution.
 from strategy import Strategy
 import pandas as pd
 import random
+import json
+
 random.seed()
 
 class Tournament():
@@ -52,7 +54,7 @@ class Tournament():
     '''
 
     for _ in range(self.num_iterations):
-      self.strats.sort(key=lambda s: s.evaluate())
+      self.strats.sort(key=lambda s: s.fitness)
       self.strats.extend([s.mutate() for s in self.strats[self.size-self.num_parents:]]) # add mutations of the best
       self.strats = self.strats[self.num_parents:] # kill off the worst
 
@@ -75,8 +77,7 @@ if __name__ == '__main__':
   '''
   Testing
   '''
-  
-  import json
+
   from candles import get_candles
 
   candles = get_candles()
