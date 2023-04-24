@@ -1,7 +1,7 @@
 import ccxt
 import pandas as pd
 
-def get_candles(time: str = '1d', market: str = 'BIT/USD') -> pd.DataFrame:
+def get_candles(time: str = '1d', market: str = 'BTC/AUD') -> pd.DataFrame:
   '''
   Return a pandas DataFrame of ohlcv candle data.
 
