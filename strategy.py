@@ -1,11 +1,7 @@
 '''
 A Strategy that triggers:
-- a buy when the buy_weighted sum of indicators turns from negative to positive.
+- a buy when the buy_weighted sum of indicators turns from negative to positive, and
 - a sell when the sell_weighted sum of indicators turns from negative to positive.
-
-Questions for lab facilitator:
-- Is 300-700, 1 day candle data points all that is required to evolve strategy? Alternatively we can fetch data in many batches and store in a file.
-- Why are all the prices between 0.26-1.24 as opposed to around $30,000 USD? if they are normalised, why isn't the min and max of a dataframe 0 and 1?
 '''
 
 import pandas as pd
@@ -27,7 +23,7 @@ class Strategy():
   ]
   NUM_INDICATORS = len(INDICATORS)
 
-  def __init__(self, candles: pd.DataFrame, params: list[dict], buy_weights: list[float], sell_weights: list[float]) -> None:
+  def __init__(self, candles: pd.DataFrame, params: list[dict], buy_weights: list[float], sell_weights: list[float], market='BTC/AUD') -> None:
     '''
     Parameters
     ----------
@@ -46,6 +42,8 @@ class Strategy():
 
     self.candles = candles
     self.close = self.candles.iloc[:, 4] # 5th column is close price
+
+    self.base, self.quote = market.split('/') # currencies
 
     self.params = params
     self.buy_weights = buy_weights
@@ -105,8 +103,8 @@ class Strategy():
 
   def evaluate(self, graph: bool = False) -> float:
     '''
-    Return the fitness of the Strategy, which is defined as the USD remaining after:
-    - starting with $1 USD,
+    Return the fitness of the Strategy, which is defined as the quote currency remaining after:
+    - starting with 1 unit of quote currency,
     - buying and selling at each trigger in the timeframe, and
     - selling in the last time period.
 
@@ -120,40 +118,40 @@ class Strategy():
       plt.plot(self.close, label='Close price')
       for i in range(Strategy.NUM_INDICATORS): plt.plot(self.indicators[i], label=Strategy.INDICATORS[i].__name__)
 
-    usd = 1
-    bitcoin = 0
+    quote = 1
+    base = 0
     bought, sold = 0, 0
 
     for t in range(1, len(self.close)):
 
       if self.buy_trigger(t):
-        bitcoin += usd / self.close[t]
+        base += quote / self.close[t]
         if graph:
-          print(f'Bought {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close[t]:4.2f}')
+          print(f'Bought {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
           plt.plot((t), (self.close[t]), 'o', color='red', label='Buy' if not bought else '')
-        usd = 0
+        quote = 0
         bought += 1
 
-      elif bitcoin and self.sell_trigger(t): # must buy before selling
-        usd += bitcoin * self.close[t]
+      elif base and self.sell_trigger(t): # must buy before selling
+        quote += base * self.close[t]
         if graph:
-          print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close[t]:4.2f}')
+          print(f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
           plt.plot((t), (self.close[t]), 'o', color='green', label='Sell' if not sold else '')
-        bitcoin = 0
+        base = 0
         sold += 1
 
     # if haven't sold, sell in last time period
-    if bitcoin:
-      usd += bitcoin * self.close.iloc[-1]
+    if base:
+      quote += base * self.close.iloc[-1]
       if graph:
-        print(f'Sold   {bitcoin:4.2f} bitcoin for {usd:4.2f} USD at time {t:3d}, price {self.close.iloc[-1]:4.2f}')
+        print(f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close.iloc[-1]:.2f}')
         plt.plot((len(self.close)-1), (self.close.iloc[-1]), 'o', color='green', label='Sell' if not sold else '')
 
     if graph:
       plt.legend()
       plt.show(block=True)
     
-    return usd
+    return quote
   
   def mutate(self) -> 'Strategy':
     '''
@@ -200,6 +198,9 @@ class Strategy():
       data = json.load(f)
       return [Strategy(candles, *d.values()) for d in data]
 
+  def __repr__(self) -> str:
+    return f'<{self.__class__.__name__} {self.to_json()}>'
+
 if __name__ == '__main__':
   '''
   Testing
@@ -209,19 +210,19 @@ if __name__ == '__main__':
 
   candles = get_candles()
 
-  # --- imitate simple strategy ---
+  # example params
   params = [
     {'window': 20}, # SMA
     {'window': 10}, # EMA
   ]
   buy_weights = [-1, 1]
   sell_weights = [1, -1]
-  # -------------------------------
 
   strat1 = Strategy(candles, params, buy_weights, sell_weights)
-  print(f'Strategy 1 fitness {strat1.evaluate():.2f}')
+  print(f'Strategy 1 fitness {strat1.fitness:.2f}\n')
 
-  filename = 'results/best.json'
+  filename = 'results/best_strategies.json'
   strat2 = Strategy.from_json(candles, filename)[0]
-
-  fitness = strat2.evaluate(graph=True)
+  
+  print('Strategy 2')
+  strat2.evaluate(graph=True)

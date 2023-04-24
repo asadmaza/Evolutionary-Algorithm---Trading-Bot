@@ -11,7 +11,7 @@ def get_candles(time: str = '1d', market: str = 'BTC/AUD') -> pd.DataFrame:
       Time period of each candle eg. '1d' or '15m'.
 
     market : str
-      The market to fetch eg. 'BIT/USD'.
+      The market to fetch eg. 'BTC/AUD'.
   '''
   
   kraken = ccxt.kraken()

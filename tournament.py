@@ -85,7 +85,7 @@ if __name__ == '__main__':
   t = Tournament(candles, size=50, num_parents=10, num_iterations=10)
   t.play()
 
-  filename = 'results/best.json'
+  filename = 'results/best_strategies.json'
 
   t.write_best(filename)
   strat = Strategy.from_json(candles, filename)[0]
