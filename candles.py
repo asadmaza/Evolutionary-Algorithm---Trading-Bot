@@ -1,7 +1,7 @@
 import ccxt
 import pandas as pd
 
-def get_candles(time: str = '1d', market: str = 'BIT/USD') -> pd.DataFrame:
+def get_candles(time: str = '1d', market: str = 'BTC/AUD') -> pd.DataFrame:
   '''
   Return a pandas DataFrame of ohlcv candle data.
 
@@ -11,7 +11,7 @@ def get_candles(time: str = '1d', market: str = 'BIT/USD') -> pd.DataFrame:
       Time period of each candle eg. '1d' or '15m'.
 
     market : str
-      The market to fetch eg. 'BIT/USD'.
+      The market to fetch eg. 'BTC/AUD'.
   '''
   
   kraken = ccxt.kraken()

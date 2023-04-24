@@ -6,6 +6,7 @@ A Strategy that triggers:
 Questions for lab facilitator:
 - Is 300-700, 1 day candle data points all that is required to evolve strategy? Alternatively we can fetch data in many batches and store in a file.
 - Why are all the prices between 0.26-1.24 as opposed to around $30,000 USD? if they are normalised, why isn't the min and max of a dataframe 0 and 1?
+-- Updated to BTC/USD
 '''
 
 import pandas as pd
