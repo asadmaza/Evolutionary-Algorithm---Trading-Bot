@@ -16,3 +16,9 @@ def get_candles(time: str = '1d', market: str = 'BIT/USD') -> pd.DataFrame:
   
   kraken = ccxt.kraken()
   return pd.DataFrame(kraken.fetch_ohlcv(market, time))
+
+if __name__ == '__main__':
+  candles = get_candles()
+
+  # print min and max of close price column
+  print(min(c:=candles.iloc[:, 4]), max(c))
