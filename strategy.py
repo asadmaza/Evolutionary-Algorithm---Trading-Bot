@@ -1,7 +1,10 @@
 '''
-A Strategy that triggers:
-- a buy when the buy_weighted sum of indicators turns from negative to positive, and
-- a sell when the sell_weighted sum of indicators turns from negative to positive.
+A Strategy that triggers a:
+- Buy when the buy_weighted sum of indicators turns from negative to positive, and
+- Sell when the sell_weighted sum of indicators turns from negative to positive.
+
+Ideas:
+- Could have separate indicators with separate params for buy and sell triggers.
 '''
 
 import pandas as pd
