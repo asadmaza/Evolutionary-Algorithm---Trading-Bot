@@ -1,3 +1,7 @@
+'''
+Helper functions to initialise, get and mutate the indicators that are used within a strategy.
+'''
+
 import pandas as pd
 import ta
 import random

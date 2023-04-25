@@ -1,3 +1,7 @@
+'''
+Get ohlcv candle data from the Kraken exchange.
+'''
+
 import ccxt
 import pandas as pd
 
