@@ -1,1 +1,1 @@
-[{"buy_weights": [-1, 1], "sell_weights": [1, -1], "params": [{"window": 5}, {"window": 6}]}]
+[{"buy_weights": [-1, 1], "sell_weights": [1, -1], "params": [{"window": 21}, {"window": 24}]}]

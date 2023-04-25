@@ -48,7 +48,7 @@ class Strategy():
     self.buy_weights = buy_weights
     self.sell_weights = sell_weights
 
-    self.indicators = indicator.get_indicators(self.close, self.params)
+    self.indicators = indicator.get_indicators(self.candles, self.params)
 
     self.fitness = self.evaluate() # evaluate fitness once on init
 
@@ -67,11 +67,6 @@ class Strategy():
   def sell_sum(self, t: int) -> float:
     '''
     Return sell_weighted sum of indicators at time period t.
-
-    Parameters
-    ----------
-      t : int
-        The time period to assess. Assumed to be within [1, len(self.close)].
     '''
 
     return sum([self.sell_weights[i] * self.indicators[i][t] for i in range(indicator.NUM_INDICATORS)])
@@ -79,11 +74,7 @@ class Strategy():
   def buy_trigger(self, t: int) -> bool:
     '''
     Return True if should buy at time period t, else False.
-
-    Parameters
-    ----------
-      t : int
-        The time period to assess. Assumed to be within [1, len(self.close)].
+    Returns True if buy-weighted sum of indicators is positive, else False.
     '''
 
     return self.buy_sum(t) > 0 and self.buy_sum(t-1) <= 0
@@ -91,11 +82,7 @@ class Strategy():
   def sell_trigger(self, t: int) -> bool:
     '''
     Return True if should sell at time period t, else False.
-
-    Parameters
-    ----------
-      t : int
-        The time period to assess. Assumed to be within [1, len(self.close)].
+    Returns True if sell-weighted sum of indicators is positive, else False.
     '''
 
     return self.sell_sum(t) > 0 and self.sell_sum(t-1) <= 0
@@ -115,7 +102,7 @@ class Strategy():
 
     if graph:
       plt.plot(self.close, label='Close price')
-      for i in range(indicator.NUM_INDICATORS): plt.plot(self.indicators[i], label=indicator.INDICATORS[i]['name'])
+      for i in range(indicator.NUM_INDICATORS): plt.plot(self.indicators[i], label=indicator.INDICATORS[i].name)
 
     quote = 1
     base = 0
@@ -155,7 +142,7 @@ class Strategy():
   def mutate(self) -> 'Strategy':
     '''
     Return a new Strategy with randomly mutated params.
-    Currently does not mutate buy and sell weights.
+    Currently does not mutate buy and sell weights, only indicator params.
     '''
 
     # could mutate weights here
@@ -172,17 +159,6 @@ class Strategy():
   def from_json(self, candles: pd.DataFrame, filename: str, n: int = 1) -> list['Strategy']:
     '''
     Return a list of n Strategy objects from json file data.
-
-    Parameters
-    ----------
-      candles : pandas.DataFrame
-        A DataFrame containing ohlcv data.
-
-      filename : str
-        Name of json file.
-
-      n : int
-        Number of Strategies to read from file.
     '''
 
     with open(filename, 'r') as f:
@@ -212,8 +188,13 @@ if __name__ == '__main__':
   strat1 = Strategy(candles, buy_weights, sell_weights, params)
   print(f'Strategy 1 fitness {strat1.fitness:.2f}\n')
 
+  # random params
+  strat2 = Strategy(candles, buy_weights, sell_weights)
+  print(f'Strategy 2 fitness {strat2.fitness:.2f}\n')
+
+  # params from json file
   filename = 'results/best_strategies.json'
-  strat2 = Strategy.from_json(candles, filename)[0]
+  strat3 = Strategy.from_json(candles, filename)[0]
   
-  print('Strategy 2')
-  strat2.evaluate(graph=True)
+  print('Strategy 3')
+  strat3.evaluate(graph=True)

@@ -6,13 +6,12 @@ from strategy import Strategy
 import pandas as pd
 import random
 import json
-import indicator
 
 random.seed()
 
 class Tournament():
   
-  def __init__(self, candles: pd.DataFrame, size: int, num_parents: int, num_iterations: int):
+  def __init__(self, candles: pd.DataFrame, size: int, num_parents: int, num_iterations: int) -> None:
     '''
     Parameters
     ----------
@@ -34,8 +33,7 @@ class Tournament():
 
     self.strats = []
     for _ in range(self.size):
-      buy_weights = [-1, 1]
-      sell_weights = [1, -1]
+      buy_weights, sell_weights = [-1, 1], [1, -1] # currently fixed
       self.strats.append(Strategy(candles, buy_weights, sell_weights)) # params are initialised randomly
 
   def play(self) -> None:
@@ -52,16 +50,18 @@ class Tournament():
       self.strats.extend([s.mutate() for s in self.strats[self.size-self.num_parents:]]) # add mutations of the best
       self.strats = self.strats[self.num_parents:] # kill off the worst
 
-  def best_strategies(self, n=1) -> Strategy:
+      # could also add some more random strategies back into the population here
+
+  def best_strategies(self, n: int = 1) -> list[Strategy]:
     '''
-    Return the best strategy in the current population.
+    Return the best n strategies in the current population.
     '''
 
     return sorted(self.strats, key=lambda s: s.evaluate(), reverse=True)[:n]
 
-  def write_best(self, filename, n=1):
+  def write_best(self, filename: str, n: int = 1) -> None:
     '''
-    Write the best n strategies in the current population to a json file
+    Write the best n strategies in the current population to a json file.
     '''
 
     with open(filename, 'w') as f:

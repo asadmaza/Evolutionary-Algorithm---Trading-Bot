@@ -1,6 +1,8 @@
 import ccxt
 import pandas as pd
 
+COLUMNS = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+
 def get_candles(time: str = '1d', market: str = 'BTC/AUD') -> pd.DataFrame:
   '''
   Return a pandas DataFrame of ohlcv candle data.
@@ -15,10 +17,10 @@ def get_candles(time: str = '1d', market: str = 'BTC/AUD') -> pd.DataFrame:
   '''
   
   kraken = ccxt.kraken()
-  return pd.DataFrame(kraken.fetch_ohlcv(market, time))
+  return pd.DataFrame(kraken.fetch_ohlcv(market, time), columns=COLUMNS)
 
 if __name__ == '__main__':
   candles = get_candles()
 
-  # print min and max of close price column
-  print(min(c:=candles.iloc[:, 4]), max(c))
+  print(candles)
+  print(min(c:=candles.iloc[:, 4]), max(c)) # print min and max of close price column
