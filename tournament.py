@@ -6,6 +6,7 @@ from strategy import Strategy
 import pandas as pd
 import random
 import json
+import indicator
 
 random.seed()
 
@@ -31,18 +32,11 @@ class Tournament():
     self.num_parents = num_parents # must be less than half the size
     self.num_iterations = num_iterations
 
-    # possible initial window sizes
-    windows = range(100)
-
     self.strats = []
     for _ in range(self.size):
-      params = [
-        {'window': random.choice(windows)},
-        {'window': random.choice(windows)},
-      ]
       buy_weights = [-1, 1]
       sell_weights = [1, -1]
-      self.strats.append(Strategy(candles, params, buy_weights, sell_weights))
+      self.strats.append(Strategy(candles, buy_weights, sell_weights)) # params are initialised randomly
 
   def play(self) -> None:
     '''
@@ -78,7 +72,7 @@ if __name__ == '__main__':
   Testing
   '''
 
-  from candles import get_candles
+  from candle import get_candles
 
   candles = get_candles()
 

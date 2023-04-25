@@ -6,24 +6,22 @@ A Strategy that triggers:
 
 import pandas as pd
 from matplotlib import pyplot as plt
-import ta
 import random
-import copy
 import json
+import indicator
 
 random.seed()
 
 class Strategy():
 
-  # callables that take close Series as first parameter and return a indicator Series
-  INDICATORS = [
-    ta.trend.sma_indicator,
-    ta.trend.ema_indicator,
-    # ... simply add more indicators
-  ]
-  NUM_INDICATORS = len(INDICATORS)
-
-  def __init__(self, candles: pd.DataFrame, params: list[dict], buy_weights: list[float], sell_weights: list[float], market='BTC/AUD') -> None:
+  def __init__(
+    self,
+    candles: pd.DataFrame,
+    buy_weights: list[float],
+    sell_weights: list[float],
+    params: list[dict] = None,
+    market='BTC/AUD'
+  ) -> None:
     '''
     Parameters
     ----------
@@ -31,7 +29,7 @@ class Strategy():
         A DataFrame containing ohlcv data.
 
       params : list[dict]
-        A list of dicts, where each dict contains the keyword arguments to pass to the corresponding indicator.
+        A list of dicts, where each dict contains the keyword arguments to pass to the corresponding indicator. The list of indicators are in indicator.py.
 
       buy_weights : list[float]
         A list of weights to be applied to each indicator in the buy sum.
@@ -45,11 +43,12 @@ class Strategy():
 
     self.base, self.quote = market.split('/') # currencies
 
-    self.params = params
+    self.params = params or indicator.random_params()
+
     self.buy_weights = buy_weights
     self.sell_weights = sell_weights
 
-    self.indicators = [Strategy.INDICATORS[i](self.close, **self.params[i]) for i in range(Strategy.NUM_INDICATORS)]
+    self.indicators = indicator.get_indicators(self.close, self.params)
 
     self.fitness = self.evaluate() # evaluate fitness once on init
 
@@ -63,7 +62,7 @@ class Strategy():
         The time period to assess. Assumed to be within [1, len(self.close)].
     '''
 
-    return sum([self.buy_weights[i] * self.indicators[i][t] for i in range(Strategy.NUM_INDICATORS)])
+    return sum([self.buy_weights[i] * self.indicators[i][t] for i in range(indicator.NUM_INDICATORS)])
 
   def sell_sum(self, t: int) -> float:
     '''
@@ -75,7 +74,7 @@ class Strategy():
         The time period to assess. Assumed to be within [1, len(self.close)].
     '''
 
-    return sum([self.sell_weights[i] * self.indicators[i][t] for i in range(Strategy.NUM_INDICATORS)])
+    return sum([self.sell_weights[i] * self.indicators[i][t] for i in range(indicator.NUM_INDICATORS)])
 
   def buy_trigger(self, t: int) -> bool:
     '''
@@ -116,7 +115,7 @@ class Strategy():
 
     if graph:
       plt.plot(self.close, label='Close price')
-      for i in range(Strategy.NUM_INDICATORS): plt.plot(self.indicators[i], label=Strategy.INDICATORS[i].__name__)
+      for i in range(indicator.NUM_INDICATORS): plt.plot(self.indicators[i], label=indicator.INDICATORS[i]['name'])
 
     quote = 1
     base = 0
@@ -156,26 +155,18 @@ class Strategy():
   def mutate(self) -> 'Strategy':
     '''
     Return a new Strategy with randomly mutated params.
-    
-    Initial strategy:
-    - multiply each param by either 0.9 or 1.1 and cast to int.
+    Currently does not mutate buy and sell weights.
     '''
 
-    mults = [0.9, 1.1]
-    params = copy.deepcopy(self.params)
-
-    for kwargs in params:
-      for k, v in kwargs.items():
-        kwargs[k] = int(v * random.choice(mults))
-
-    return Strategy(self.candles, params, self.buy_weights, self.sell_weights)
+    # could mutate weights here
+    return Strategy(self.candles, self.buy_weights, self.sell_weights, indicator.mutate_params(self.params))
   
   def to_json(self) -> dict:
     '''
     Return a dict of the minimum data needed to represent this strategy.
     '''
 
-    return {'params': self.params, 'buy_weights': self.buy_weights, 'sell_weights': self.sell_weights}
+    return { 'buy_weights': self.buy_weights, 'sell_weights': self.sell_weights, 'params': self.params }
   
   @classmethod
   def from_json(self, candles: pd.DataFrame, filename: str, n: int = 1) -> list['Strategy']:
@@ -196,7 +187,7 @@ class Strategy():
 
     with open(filename, 'r') as f:
       data = json.load(f)
-      return [Strategy(candles, *d.values()) for d in data]
+      return [Strategy(candles, *d.values()) for d in data][:n]
 
   def __repr__(self) -> str:
     return f'<{self.__class__.__name__} {self.to_json()}>'
@@ -206,7 +197,7 @@ if __name__ == '__main__':
   Testing
   '''
   
-  from candles import get_candles
+  from candle import get_candles
 
   candles = get_candles()
 
@@ -218,7 +209,7 @@ if __name__ == '__main__':
   buy_weights = [-1, 1]
   sell_weights = [1, -1]
 
-  strat1 = Strategy(candles, params, buy_weights, sell_weights)
+  strat1 = Strategy(candles, buy_weights, sell_weights, params)
   print(f'Strategy 1 fitness {strat1.fitness:.2f}\n')
 
   filename = 'results/best_strategies.json'
