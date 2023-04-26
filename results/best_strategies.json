@@ -1,1 +1,902 @@
-[{"buy_weights": [-1, 1], "sell_weights": [1, -1], "params": [{"window": 21}, {"window": 24}]}]
+[
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1.1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 73
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1.1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 73
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1.1
+    ],
+    "sell_weights": [
+      1.0,
+      -0.9
+    ],
+    "params": [
+      {
+        "window": 67
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1.1,
+      -0.9
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -0.9
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.8
+    ],
+    "sell_weights": [
+      0.9,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.8
+    ],
+    "sell_weights": [
+      0.9,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
+    ],
+    "sell_weights": [
+      1.0,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -0.9
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 76
+      },
+      {
+        "window": 49
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -0.8
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
+    ],
+    "sell_weights": [
+      1,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.9
+    ],
+    "sell_weights": [
+      1.1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.9
+    ],
+    "sell_weights": [
+      1.1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.9
+    ],
+    "sell_weights": [
+      1.1,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      1.0
+    ],
+    "sell_weights": [
+      1.2000000000000002,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 68
+      },
+      {
+        "window": 6
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      1.1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1.1,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      1.0
+    ],
+    "sell_weights": [
+      1.1,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 62
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1
+    ],
+    "params": [
+      {
+        "window": 59
+      },
+      {
+        "window": 37
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      1.0
+    ],
+    "sell_weights": [
+      1,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 62
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1
+    ],
+    "params": [
+      {
+        "window": 76
+      },
+      {
+        "window": 55
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.9
+    ],
+    "sell_weights": [
+      1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.8,
+      0.9
+    ],
+    "sell_weights": [
+      1.1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.9
+    ],
+    "sell_weights": [
+      1,
+      -1
+    ],
+    "params": [
+      {
+        "window": 83
+      },
+      {
+        "window": 55
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      1.0
+    ],
+    "sell_weights": [
+      1.1,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.8,
+      0.8
+    ],
+    "sell_weights": [
+      0.9,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 67
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.9
+    ],
+    "sell_weights": [
+      0.9,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 67
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1
+    ],
+    "params": [
+      {
+        "window": 68
+      },
+      {
+        "window": 49
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1
+    ],
+    "params": [
+      {
+        "window": 30
+      },
+      {
+        "window": 28
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1.1
+    ],
+    "sell_weights": [
+      0.9,
+      -1
+    ],
+    "params": [
+      {
+        "window": 62
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.9
+    ],
+    "sell_weights": [
+      1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1
+    ],
+    "params": [
+      {
+        "window": 57
+      },
+      {
+        "window": 34
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.8
+    ],
+    "sell_weights": [
+      0.9,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 67
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -0.9
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.8
+    ],
+    "sell_weights": [
+      1.1,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.8,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 83
+      },
+      {
+        "window": 49
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      1.0
+    ],
+    "sell_weights": [
+      1.0,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1.1
+    ],
+    "sell_weights": [
+      0.8,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 69
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -0.9
+    ],
+    "params": [
+      {
+        "window": 62
+      },
+      {
+        "window": 8
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1.0
+    ],
+    "sell_weights": [
+      1.1,
+      -0.8
+    ],
+    "params": [
+      {
+        "window": 60
+      },
+      {
+        "window": 6
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -0.8,
+      0.8
+    ],
+    "sell_weights": [
+      0.8,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 75
+      },
+      {
+        "window": 7
+      }
+    ]
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.8
+    ],
+    "sell_weights": [
+      0.9,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 67
+      },
+      {
+        "window": 7
+      }
+    ]
+  }
+]

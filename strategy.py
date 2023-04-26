@@ -20,8 +20,8 @@ class Strategy():
   def __init__(
     self,
     candles: pd.DataFrame,
-    buy_weights: list[float],
-    sell_weights: list[float],
+    buy_weights: list[float] = None,
+    sell_weights: list[float] = None,
     params: list[dict] = None,
     market='BTC/AUD'
   ) -> None:
@@ -48,10 +48,14 @@ class Strategy():
 
     self.params = params or indicator.random_params()
 
-    self.buy_weights = buy_weights
-    self.sell_weights = sell_weights
+    # if not given, weights are initialised randomly between -1 and 1
+    self.buy_weights = buy_weights or [random.randrange(-10, 11)/10 for _ in range(indicator.NUM_INDICATORS)]
+    self.sell_weights = sell_weights or [random.randrange(-10, 11)/10 for _ in range(indicator.NUM_INDICATORS)]
 
     self.indicators = indicator.get_indicators(self.candles, self.params)
+
+    # could use these instead
+    self.normalised_indicators = [(ind - (m:=ind.min())) / (ind.max() - m) for ind in self.indicators]
 
     self.fitness = self.evaluate() # evaluate fitness once on init
 
@@ -65,6 +69,7 @@ class Strategy():
         The time period to assess. Assumed to be within [1, len(self.close)].
     '''
 
+    # could use self.normalised_indicators here
     return sum([self.buy_weights[i] * self.indicators[i][t] for i in range(indicator.NUM_INDICATORS)])
 
   def sell_sum(self, t: int) -> float:
@@ -113,7 +118,7 @@ class Strategy():
 
     for t in range(1, len(self.close)):
 
-      if self.buy_trigger(t):
+      if bought == sold and self.buy_trigger(t):
         base += quote / self.close[t]
         if graph:
           print(f'Bought {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
@@ -121,7 +126,7 @@ class Strategy():
         quote = 0
         bought += 1
 
-      elif base and self.sell_trigger(t): # must buy before selling
+      elif bought > sold and self.sell_trigger(t): # must buy before selling
         quote += base * self.close[t]
         if graph:
           print(f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
@@ -142,14 +147,22 @@ class Strategy():
     
     return quote
   
-  def mutate(self) -> 'Strategy':
+  def mutate(self, weight_prob=0.5, param_prob=0.5) -> 'Strategy':
     '''
-    Return a new Strategy with randomly mutated params.
-    Currently does not mutate buy and sell weights, only indicator params.
+    Return a new Strategy with randomly mutated weights and params.
     '''
 
-    # could mutate weights here
-    return Strategy(self.candles, self.buy_weights, self.sell_weights, indicator.mutate_params(self.params))
+    # mutate weights
+    buy_weights, sell_weights = self.buy_weights.copy(), self.sell_weights.copy()
+    ds = [-0.1, 0.1]
+    for i in range(indicator.NUM_INDICATORS):
+      if random.random() > weight_prob: buy_weights[i] += random.choice(ds)
+      if random.random() > weight_prob: sell_weights[i] += random.choice(ds)
+
+    # mutate params
+    params = indicator.mutate_params(self.params, param_prob)
+
+    return Strategy(self.candles, buy_weights, sell_weights, params)
   
   def to_json(self) -> dict:
     '''

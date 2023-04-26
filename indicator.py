@@ -8,6 +8,8 @@ import random
 import copy
 import random
 
+random.seed()
+
 class Indicator():
   def __init__(
     self,
@@ -44,7 +46,7 @@ class Indicator():
     self.mutator_fn = mutator_fn
     self.random_params_fn = random_params_fn
 
-# ----- Indicator-specific mutator functions -----
+# ----- Indicator-specific mutator functions ----------
 
 def mutate_ma(params: dict) -> dict:
   '''
@@ -53,7 +55,7 @@ def mutate_ma(params: dict) -> dict:
   Parameters
   ----------
     params : dict
-      Keyword arguments, assumed to contain a 'window' key.
+      Keyword arguments, assumed to contain only a 'window' key.
   '''
   
   mults = [0.9, 1.1]
@@ -66,9 +68,9 @@ def random_ma_params() -> dict:
   Return random, sensible params for the moving average indicator.
   '''
 
-  return { 'window': random.randrange(100) }
+  return { 'window': random.randrange(1, 100) }
 
-# -----------------------------------
+# ------------------------------------------------------
 
 INDICATORS = [
   Indicator('SMA', ta.trend.sma_indicator, ['close'], mutate_ma, random_ma_params),
@@ -94,15 +96,14 @@ def get_indicators(candles: pd.DataFrame, params: list[dict]) -> list[pd.Series]
 
 def random_params() -> list[dict]:
   '''
-  Return a list of random, sensible params for each indicator.
+  Return a list of random, sensible params for each indicator by calling its random_params_fn.
   '''
 
   return [ind.random_params_fn() for ind in INDICATORS]
 
 def mutate_params(params: list[dict], prob: float = 1.0) -> list[dict]:
   '''
-  Return a copy of params where each param dict was mutated with probability prob, else unchanged.
-  Each param dict is mutated by the corresponding mutator function of the indicator.
+  Return a copy of params where each param dict was mutated with probability prob by the indicator's mutator_fn, else unchanged.
 
   Parameters:
     params : list[dict]

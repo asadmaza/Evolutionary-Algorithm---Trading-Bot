@@ -33,8 +33,9 @@ class Tournament():
 
     self.strats = []
     for _ in range(self.size):
-      buy_weights, sell_weights = [-1, 1], [1, -1] # currently fixed
-      self.strats.append(Strategy(candles, buy_weights, sell_weights)) # params are initialised randomly
+      buy_weights, sell_weights = [-1, 1], [1, -1] # currently fix half population to mimic simple strategy
+      if random.random() < 0.5: self.strats.append(Strategy(candles, buy_weights, sell_weights))
+      else: self.strats.append(Strategy(candles))
 
   def play(self) -> None:
     '''
@@ -50,7 +51,7 @@ class Tournament():
       self.strats.extend([s.mutate() for s in self.strats[self.size-self.num_parents:]]) # add mutations of the best
       self.strats = self.strats[self.num_parents:] # kill off the worst
 
-      # could also add some more random strategies back into the population here
+      # could also add more random strategies back into the population at each iteration
 
   def best_strategies(self, n: int = 1) -> list[Strategy]:
     '''
@@ -65,7 +66,7 @@ class Tournament():
     '''
 
     with open(filename, 'w') as f:
-      json.dump([s.to_json() for s in self.best_strategies(n)], f)
+      json.dump([s.to_json() for s in self.best_strategies(n)], f, indent=2)
 
 if __name__ == '__main__':
   '''
@@ -81,7 +82,7 @@ if __name__ == '__main__':
 
   filename = 'results/best_strategies.json'
 
-  t.write_best(filename)
+  t.write_best(filename, t.size)
   strat = Strategy.from_json(candles, filename)[0]
 
   print(strat)
