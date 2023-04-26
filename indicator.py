@@ -31,7 +31,7 @@ class Indicator():
         Function that returns an indicator Series.
 
       columns : list[str]
-        Ordered list of ohlcv column names to pass as the first parameters to ind_fn. Column names are found in candle.py. 
+        Ordered list of ohlcv column names to pass as the first constant parameters to ind_fn. Column names are found in candle.py. 
 
       mutator_fn : function
         Function that takes a dictionary of parameters to ind_fn and returns a mutated copy of them.
@@ -75,6 +75,8 @@ def random_ma_params() -> dict:
 INDICATORS = [
   Indicator('SMA', ta.trend.sma_indicator, ['close'], mutate_ma, random_ma_params),
   Indicator('EMA', ta.trend.ema_indicator, ['close'], mutate_ma, random_ma_params),
+
+  # Indicator('ADX', ta.trend.adx, ['high', 'low', 'close'], )
 ]
 
 NUM_INDICATORS = len(INDICATORS)

@@ -167,9 +167,10 @@ class Strategy():
   def to_json(self) -> dict:
     '''
     Return a dict of the minimum data needed to represent this strategy.
+    Also fitness.
     '''
 
-    return { 'buy_weights': self.buy_weights, 'sell_weights': self.sell_weights, 'params': self.params }
+    return { 'buy_weights': self.buy_weights, 'sell_weights': self.sell_weights, 'params': self.params, 'fitness': self.fitness }
   
   @classmethod
   def from_json(self, candles: pd.DataFrame, filename: str, n: int = 1) -> list['Strategy']:
@@ -179,7 +180,7 @@ class Strategy():
 
     with open(filename, 'r') as f:
       data = json.load(f)
-      return [Strategy(candles, *d.values()) for d in data][:n]
+      return [Strategy(candles, d['buy_weights'], d['sell_weights'], d['params']) for d in data][:n]
 
   def __repr__(self) -> str:
     return f'<{self.__class__.__name__} {self.to_json()}>'

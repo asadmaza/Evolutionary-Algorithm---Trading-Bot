@@ -32,10 +32,11 @@ class Tournament():
     self.num_iterations = num_iterations
 
     self.strats = []
-    for _ in range(self.size):
-      buy_weights, sell_weights = [-1, 1], [1, -1] # currently fix half population to mimic simple strategy
-      if random.random() < 0.5: self.strats.append(Strategy(candles, buy_weights, sell_weights))
-      else: self.strats.append(Strategy(candles))
+
+    buy_weights, sell_weights = [-1, 1], [1, -1]
+    for _ in range(self.size // 2): # assume size is even
+      self.strats.append(Strategy(candles))
+      self.strats.append(Strategy(candles, buy_weights, sell_weights)) # seed half the population with 'good' weights
 
   def play(self) -> None:
     '''
@@ -47,9 +48,9 @@ class Tournament():
     '''
 
     for _ in range(self.num_iterations):
-      self.strats.sort(key=lambda s: s.fitness)
-      self.strats.extend([s.mutate() for s in self.strats[self.size-self.num_parents:]]) # add mutations of the best
-      self.strats = self.strats[self.num_parents:] # kill off the worst
+      self.strats.sort(key=lambda s: s.fitness, reverse=True) # best strategies sorted to the top
+      self.strats = self.strats[:-self.num_parents] # kill off the worst
+      self.strats.extend([s.mutate() for s in self.strats[:self.num_parents]]) # add mutations of the best
 
       # could also add more random strategies back into the population at each iteration
 
@@ -77,7 +78,7 @@ if __name__ == '__main__':
 
   candles = get_candles()
 
-  t = Tournament(candles, size=50, num_parents=10, num_iterations=10)
+  t = Tournament(candles, size=50, num_parents=20, num_iterations=10)
   t.play()
 
   filename = 'results/best_strategies.json'

@@ -1,5 +1,9 @@
 '''
 Get ohlcv candle data from the Kraken exchange.
+
+TODO:
+- extend this to fetch batches of past data and save in file.
+- split data into batches of training and test data.
 '''
 
 import ccxt
