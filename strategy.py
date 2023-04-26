@@ -166,8 +166,7 @@ class Strategy():
   
   def to_json(self) -> dict:
     '''
-    Return a dict of the minimum data needed to represent this strategy.
-    Also fitness.
+    Return a dict of the minimum data needed to represent this strategy, as well as the fitness.
     '''
 
     return { 'buy_weights': self.buy_weights, 'sell_weights': self.sell_weights, 'params': self.params, 'fitness': self.fitness }
