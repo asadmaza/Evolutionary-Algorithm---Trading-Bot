@@ -28,9 +28,12 @@ def get_candles(since: int = SINCE, fetch: bool = False, time: str = '1d', marke
       The market to fetch eg. 'BTC/AUD'.
   '''
 
-  try:
-    return pd.read_csv('candles.csv')
-  except:  
+  read = True
+
+  if not fetch:
+    try: return pd.read_csv('candles.csv')
+    except: read = False
+  if fetch or not read:
     kraken = ccxt.kraken()
     candles = pd.DataFrame(kraken.fetch_ohlcv(market, time, since), columns=COLUMNS)
     candles.to_csv('candles.csv', index=False)
@@ -38,5 +41,8 @@ def get_candles(since: int = SINCE, fetch: bool = False, time: str = '1d', marke
 
 if __name__ == '__main__':
   candles = get_candles()
+  candles2 = get_candles(fetch=True)
+
+  print(all(candles==candles2))
 
   print(min(c:=candles.iloc[:, 4]), max(c)) # print min and max of close price column
