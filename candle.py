@@ -32,7 +32,7 @@ def get_candles(since: int = SINCE, fetch: bool = False, time: str = '1d', marke
     return pd.read_csv('candles.csv')
   except:  
     kraken = ccxt.kraken()
-    candles = pd.DataFrame(kraken.fetch_ohlcv(market, time), columns=COLUMNS)
+    candles = pd.DataFrame(kraken.fetch_ohlcv(market, time, since), columns=COLUMNS)
     candles.to_csv('candles.csv', index=False)
     return candles
 
