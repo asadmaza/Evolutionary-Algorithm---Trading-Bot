@@ -10,8 +10,9 @@ import ccxt
 import pandas as pd
 
 COLUMNS = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+SINCE = 1620345600000
 
-def get_candles(fetch: bool = False, time: str = '1d', market: str = 'BTC/AUD') -> pd.DataFrame:
+def get_candles(since: int = SINCE, fetch: bool = False, time: str = '1d', market: str = 'BTC/AUD') -> pd.DataFrame:
   '''
   Return a pandas DataFrame of ohlcv candle data.
 
@@ -38,5 +39,4 @@ def get_candles(fetch: bool = False, time: str = '1d', market: str = 'BTC/AUD') 
 if __name__ == '__main__':
   candles = get_candles()
 
-  print(candles)
   print(min(c:=candles.iloc[:, 4]), max(c)) # print min and max of close price column
