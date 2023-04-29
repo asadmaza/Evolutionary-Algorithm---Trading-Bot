@@ -6,6 +6,7 @@ from strategy import Strategy
 import pandas as pd
 import random
 import json
+from fitness import Fitness
 
 random.seed()
 
@@ -59,7 +60,9 @@ class Tournament():
     Return the best n strategies in the current population.
     '''
 
-    return sorted(self.strats, key=lambda s: s.evaluate(), reverse=True)[:n]
+    f = Fitness()
+    # return sorted(self.strats, key=lambda s: s.evaluate(), reverse=True)[:n]
+    return sorted(self.strats, key=lambda s: f.get_sharpe_raw(s), reverse=True)[:n]
 
   def write_best(self, filename: str, n: int = 1) -> None:
     '''

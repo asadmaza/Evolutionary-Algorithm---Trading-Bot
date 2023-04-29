@@ -12,6 +12,7 @@ from matplotlib import pyplot as plt
 import random
 import json
 import indicator
+import uuid
 
 random.seed()
 
@@ -40,6 +41,9 @@ class Strategy():
       sell_weights : list[float]
         A list of weights to be applied to each indicator in the sell sum.
     '''
+
+    self.id = uuid.uuid4()
+    self.close_prices = []
 
     self.candles = candles
     self.close = self.candles.iloc[:, 4] # 5th column is close price
@@ -112,14 +116,20 @@ class Strategy():
       plt.plot(self.close, label='Close price')
       for i in range(indicator.NUM_INDICATORS): plt.plot(self.indicators[i], label=indicator.INDICATORS[i].name)
 
-    quote = 1
+    quote = 100
+    total_sum = 100
     base = 0
     bought, sold = 0, 0
+
+    self.close_prices.append(total_sum)
 
     for t in range(1, len(self.close)):
 
       if bought == sold and self.buy_trigger(t):
         base += quote / self.close[t]
+        total_sum = quote
+        self.close_prices.append(total_sum)
+
         if graph:
           print(f'Bought {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
           plt.plot((t), (self.close[t]), 'o', color='red', label='Buy' if not bought else '')
@@ -128,15 +138,28 @@ class Strategy():
 
       elif bought > sold and self.sell_trigger(t): # must buy before selling
         quote += base * self.close[t]
+        total_sum = quote
+        self.close_prices.append(total_sum)
+
         if graph:
           print(f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
           plt.plot((t), (self.close[t]), 'o', color='green', label='Sell' if not sold else '')
         base = 0
         sold += 1
 
+      else:
+        temp = quote + base * self.close[t]
+        total_sum = temp
+        self.close_prices.append(total_sum)
+
+
+
     # if haven't sold, sell in last time period
     if base:
       quote += base * self.close.iloc[-1]
+      total_sum = quote
+      self.close_prices.append(total_sum)
+
       if graph:
         print(f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close.iloc[-1]:.2f}')
         plt.plot((len(self.close)-1), (self.close.iloc[-1]), 'o', color='green', label='Sell' if not sold else '')
@@ -144,7 +167,9 @@ class Strategy():
     if graph:
       plt.legend()
       plt.show(block=True)
-    
+
+
+
     return quote
   
   def mutate(self, weight_prob=0.5, param_prob=0.5) -> 'Strategy':
