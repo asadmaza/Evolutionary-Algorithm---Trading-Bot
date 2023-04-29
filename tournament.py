@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
   candles = get_candles()
 
-  t = Tournament(candles, size=50, num_parents=20, num_iterations=10)
+  t = Tournament(candles, size=50, num_parents=20, num_iterations=20)
   t.play()
 
   filename = 'results/best_strategies.json'
@@ -90,6 +90,8 @@ if __name__ == '__main__':
   strat = Strategy.from_json(candles, filename)[0]
 
   print(strat)
+  f = Fitness()
+  print(f.get_sharpe_raw(strat, True))
   print(strat.evaluate())
 
 

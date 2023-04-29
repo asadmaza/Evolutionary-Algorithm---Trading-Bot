@@ -27,12 +27,12 @@ class Fitness():
     def get_ROI_raw(self, strat):
         return strat.quote
     
-    def get_sharpe_raw(self, strat):
+    def get_sharpe_raw(self, strat, printing=False):
         daily_returns = []
-        # self.rf = 0.05
+        self.rf = 0.012/365
 
         # TODO: If it's non 0 the fitness doesn't seem to work, not sure why?
-        self.rf = 0
+        # self.rf = 0
 
         for i in range(1, len(strat.close_prices)):
             daily_return = (strat.close_prices[i] - strat.close_prices[i-1]) / (strat.close_prices[i-1])
@@ -46,6 +46,10 @@ class Fitness():
             return 0
 
         sharpe_ratio = (avg_daily_return - self.rf) / std_dev_daily_return
+
+        if printing==True:
+            print(avg_daily_return)
+            print(std_dev_daily_return)
 
         return sharpe_ratio
 
