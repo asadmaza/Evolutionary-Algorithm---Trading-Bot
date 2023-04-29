@@ -168,8 +168,6 @@ class Strategy():
       plt.legend()
       plt.show(block=True)
 
-
-
     return quote
   
   def mutate(self, weight_prob=0.5, param_prob=0.5) -> 'Strategy':
