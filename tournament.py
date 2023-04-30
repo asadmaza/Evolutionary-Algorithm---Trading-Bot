@@ -49,7 +49,9 @@ class Tournament():
     '''
 
     for _ in range(self.num_iterations):
-      self.strats.sort(key=lambda s: s.fitness, reverse=True) # best strategies sorted to the top
+      f = Fitness()
+
+      self.strats.sort(key=lambda s: f.get_sharpe_raw(s), reverse=True) # best strategies sorted to the top
       self.strats = self.strats[:-self.num_parents] # kill off the worst
       self.strats.extend([s.mutate() for s in self.strats[:self.num_parents]]) # add mutations of the best
 

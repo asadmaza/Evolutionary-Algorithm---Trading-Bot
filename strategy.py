@@ -117,7 +117,7 @@ class Strategy():
       for i in range(indicator.NUM_INDICATORS): plt.plot(self.indicators[i], label=indicator.INDICATORS[i].name)
 
     quote = 100
-    total_sum = 100
+    total_sum = quote
     base = 0
     bought, sold = 0, 0
 
