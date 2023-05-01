@@ -8,6 +8,7 @@ Ideas:
 """
 
 import pandas as pd
+import numpy as np
 from matplotlib import pyplot as plt
 import random
 import json
@@ -20,8 +21,6 @@ class Strategy:
     def __init__(
         self,
         candles: pd.DataFrame,
-        buy_weights: list[float] = None,
-        sell_weights: list[float] = None,
         params: list[dict] = None,
         market="BTC/AUD",
     ) -> None:
@@ -47,69 +46,43 @@ class Strategy:
         self.base, self.quote = market.split("/")  # currencies
 
         self.params = params or indicator.random_params()
-
-        # if not given, weights are initialised randomly between -1 and 1
-        self.buy_weights = buy_weights or [
-            random.randrange(-10, 11) / 10 for _ in range(indicator.NUM_INDICATORS)
-        ]
-        self.sell_weights = sell_weights or [
-            random.randrange(-10, 11) / 10 for _ in range(indicator.NUM_INDICATORS)
-        ]
-
+        self.constants = np.round(np.random.uniform(0, 3, 6), 2)  # 6 constants
         self.indicators = indicator.get_indicators(self.candles, self.params)
 
-        # could use these instead
-        self.normalised_indicators = [
-            (ind - (m := ind.min())) / (ind.max() - m) for ind in self.indicators
-        ]
-
         self.fitness = self.evaluate()  # evaluate fitness once on init
-
-    def buy_sum(self, t: int) -> float:
-        """
-        Return buy_weighted sum of indicators at time period t.
-
-        Parameters
-        ----------
-          t : int
-            The time period to assess. Assumed to be within [1, len(self.close)].
-        """
-
-        # could use self.normalised_indicators here
-        return sum(
-            [
-                self.buy_weights[i] * self.indicators[i][t]
-                for i in range(indicator.NUM_INDICATORS)
-            ]
-        )
-
-    def sell_sum(self, t: int) -> float:
-        """
-        Return sell_weighted sum of indicators at time period t.
-        """
-
-        return sum(
-            [
-                self.sell_weights[i] * self.indicators[i][t]
-                for i in range(indicator.NUM_INDICATORS)
-            ]
-        )
 
     def buy_trigger(self, t: int) -> bool:
         """
         Return True if should buy at time period t, else False.
-        Returns True if buy-weighted sum of indicators is positive, else False.
         """
-
-        return self.buy_sum(t) > 0 and self.buy_sum(t - 1) <= 0
+        return (
+            (
+                self.indicators["SMA1"][t]
+                > self.constants[0] * self.indicators["SMA2"][t]
+            )
+            and (self.close[t] > self.constants[1] * self.indicators["EMA"][t])
+            # TODO: is close < c bollinger_low or close > c bollinger_low?
+            and (
+                self.close[t]
+                > self.constants[2] * self.indicators["Bollinger_lower"][t]
+            )
+        )
 
     def sell_trigger(self, t: int) -> bool:
         """
         Return True if should sell at time period t, else False.
-        Returns True if sell-weighted sum of indicators is positive, else False.
         """
-
-        return self.sell_sum(t) > 0 and self.sell_sum(t - 1) <= 0
+        return (
+            (
+                self.indicators["SMA2"][t]
+                > self.constants[3] * self.indicators["SMA1"][t]
+            )
+            and (self.indicators["EMA"][t] > self.constants[4] * self.close[t])
+            and (
+                self.close[t]
+                > self.constants[5] * self.indicators["Bollinger_higher"][t]
+            )
+        )
 
     def evaluate(self, graph: bool = False) -> float:
         """
@@ -129,7 +102,7 @@ class Strategy:
             for i in range(indicator.NUM_INDICATORS):
                 plt.plot(self.indicators[i], label=indicator.INDICATORS[i].name)
 
-        quote = 1
+        quote = 100
         base = 0
         bought, sold = 0, 0
 
