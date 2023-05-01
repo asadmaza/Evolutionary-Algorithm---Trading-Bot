@@ -82,7 +82,7 @@ class Strategy:
             (self.sma1[t] > self.chromosome["constants"][0] * self.sma2[t])
             and (self.close[t] > self.chromosome["constants"][1] * self.ema[t])
             # TODO: is close < c bollinger_low or close > c bollinger_low?
-            and (
+            or (
                 self.close[t]
                 > self.chromosome["constants"][2] * self.bollinger_lband[t]
             )
@@ -95,7 +95,7 @@ class Strategy:
         return (
             (self.sma2[t] > self.chromosome["constants"][3] * self.sma1[t])
             and (self.ema[t] > self.chromosome["constants"][4] * self.close[t])
-            and (
+            or (
                 self.close[t]
                 > self.chromosome["constants"][5] * self.bollinger_hband[t]
             )
@@ -136,8 +136,7 @@ class Strategy:
 
         for t in range(1, len(self.close)):
             if bought == sold and self.buy_trigger(t):
-                print("buying")
-                base += quote / self.close[t]
+                base += (quote * 0.98) / self.close[t]
                 if graph:
                     print(
                         f"Bought {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}"
@@ -153,8 +152,7 @@ class Strategy:
                 bought += 1
 
             elif bought > sold and self.sell_trigger(t):  # must buy before selling
-                print("selling")
-                quote += base * self.close[t]
+                quote += (base * self.close[t]) * 0.98
                 if graph:
                     print(
                         f"Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}"
@@ -247,14 +245,14 @@ if __name__ == "__main__":
 
     candles = get_candles()
 
-    strat = Strategy(candles)
-    print(f"Strategy fitness {strat.fitness:.2f}\n")
-    print(strat)
-    strat.evaluate(graph=True)
+    best_fitness = 0
+    # Randomly generate strategies and write the best to a file
+    while True:
+        strat = Strategy(candles)
+        print(f"Strategy fitness {strat.fitness:.2f}\n")
 
-    # params from json file
-    # filename = "results/best_strategies.json"
-    # strat3 = Strategy.from_json(candles, filename)[0]
-
-    # print("Strategy 3")
-    # strat3.evaluate(graph=True)
+        if strat.fitness > best_fitness:
+            filename = "results/best_strategies.json"
+            with open(filename, "w") as f:
+                json.dump(strat.to_json(), f, indent=2)
+            best_fitness = strat.fitness
