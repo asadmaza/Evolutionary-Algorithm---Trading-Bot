@@ -126,6 +126,8 @@ class Strategy():
     portfolio = quote
     base = 0
     bought, sold = 0, 0
+    self.close_prices = []
+
 
     self.close_prices.append(portfolio)
 

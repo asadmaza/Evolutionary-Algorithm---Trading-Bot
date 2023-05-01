@@ -9,7 +9,6 @@ import indicator
 class Optimal(Strategy):
     def __init__(self, candles) -> None:
         super().__init__(candles)
-        self.close = self.close
 
         # Duplicate the first value - fixes the looping
         self.close.loc[-1] = self.close[0]
@@ -38,8 +37,7 @@ if __name__ == '__main__':
   candles = get_candles()
 
   o = Optimal(candles)
-  portfolio = o.evaluate(True)
+  portfolio = o.evaluate(False)
   f = Fitness()
   o.update_fitness(f.get_sharpe_raw(o))
   print(portfolio)
-  print(o.portfolio)
