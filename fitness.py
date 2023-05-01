@@ -3,6 +3,7 @@ Calculate the normalised fitness of a strategy
 '''
 
 import statistics
+from typing import Literal
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 from strategy import Strategy
@@ -15,11 +16,13 @@ class Fitness():
         self.generation = 0
 
         self.fitness = {}
+        self.portfolio = {}
 
     def update_generation(self, strats):
         self.generation += 1
         self.strats = copy.deepcopy(strats)
         self.fitness[self.generation] = []
+        self.portfolio[self.generation] = []
 
     def ROI(self):
         scaler = MinMaxScaler()
@@ -35,7 +38,7 @@ class Fitness():
             return self.roi_quotes[strat.id]
         
     def get_ROI_raw(self, strat):
-        return strat.quote
+        return strat.portfolio
     
     def get_sharpe_raw(self, strat):
         daily_returns = []
@@ -55,22 +58,30 @@ class Fitness():
             sharpe_ratio = (avg_daily_return - self.rf) / std_dev_daily_return
 
         self.fitness[self.generation].append(sharpe_ratio)
+        self.portfolio[self.generation].append(strat.portfolio)
 
         return sharpe_ratio
     
     
-    def generate_generation_graph(self, generation=-1):
+    def generate_generation_graph(self, generation=-1, type: Literal['fitness', 'porfolio'] = "fitness"):
+        data = self.fitness
+        if type == 'portfolio':
+            data = self.portfolio
+
         if generation == -1: generation = self.generation
-        self.fitness[generation] = sorted(self.fitness[generation])
-        plt.plot(self.fitness[generation])
+        data[generation] = sorted(data[generation])
+        plt.plot(data[generation])
         plt.show()
 
-    def generate_average_graph(self):
-
+    def generate_average_graph(self, type: Literal['fitness', 'porfolio'] = "fitness"):
+        data = self.fitness
+        if type == 'portfolio':
+            data = self.portfolio
+        
         averages = []
         generations = []
         for g in range(1, self.generation+1):
-            averages.append(np.average(self.fitness[g]))
+            averages.append(np.average(data[g]))
             generations.append(g)
         plt.plot(generations, averages, marker="o")
         plt.xticks(range(1, len(generations)+1), map(str, generations))

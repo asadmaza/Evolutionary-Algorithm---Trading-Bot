@@ -69,6 +69,7 @@ class Tournament():
 
       # self.fitness.generate_generation_graph()
     self.fitness.generate_average_graph()
+    self.fitness.generate_average_graph(type="portfolio")
 
       # could also add more random strategies back into the population at each iteration
 
