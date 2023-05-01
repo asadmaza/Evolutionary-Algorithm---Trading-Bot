@@ -17,9 +17,10 @@ from ta.volatility import bollinger_lband, bollinger_hband
 
 
 class Strategy:
-    WIN_MAX = 30  # Max window size for indicators when initialising
-    WIN_DEV_MAX = 5  # Max window deviation for indicators when initialising
-    CONST_MAX = 3  # Max constant for indicators when initialising
+    WIN_MAX = 50  # Max window size for indicators when initialising
+    WIN_DEV_MAX = 10  # Max window deviation for indicators when initialising
+    CONST_MAX = 5  # Max constant for indicators when initialising
+    DECIMAL_PLACE = 3  # Decimal place to round for float params
 
     def __init__(
         self,
@@ -48,10 +49,12 @@ class Strategy:
                 random.randint(1, self.WIN_MAX) for _ in range(self.n_indicators)
             ],
             "window_devs": [
-                round(random.uniform(1, self.WIN_DEV_MAX), 1) for _ in range(2)
+                round(random.uniform(1, self.WIN_DEV_MAX), self.DECIMAL_PLACE)
+                for _ in range(2)
             ],
             "constants": [
-                round(random.uniform(0, self.CONST_MAX), 2) for _ in range(6)
+                round(random.uniform(0, self.CONST_MAX), self.DECIMAL_PLACE)
+                for _ in range(6)
             ],
         }
         self.set_indicators(self.chromosome)
