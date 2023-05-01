@@ -2,6 +2,7 @@
 Run a tournament to find the best Strategy through evolution.
 '''
 
+from candle import get_candles_split
 from strategy import Strategy
 import pandas as pd
 import numpy as np
@@ -41,7 +42,7 @@ class Tournament():
       self.strats.append(Strategy(candles))
       self.strats.append(Strategy(candles, buy_weights, sell_weights)) # seed half the population with 'good' weights
 
-    self.fitness = Fitness(self.strats)
+    self.fitness = Fitness(self.strats, batches=4)
 
   def play(self) -> None:
     '''
@@ -58,7 +59,7 @@ class Tournament():
       self.fitness.update_generation(self.strats)
 
       for s in self.strats:
-        s.update_fitness(self.fitness.get_sharpe_raw(s))
+        s.update_fitness(self.fitness.get_fitness(s))
 
       self.strats.sort(key=lambda s: s.fitness, reverse=True) # best strategies sorted to the top
 
@@ -108,19 +109,23 @@ if __name__ == '__main__':
   Testing
   '''
 
-  from candle import get_candles
-
-  candles = get_candles()
+  train_candles, test_candles = get_candles_split(0.8)
 
   start = time.time()
-  t = Tournament(candles, size=50, num_parents=20, num_iterations=50)
+  t = Tournament(train_candles, size=50, num_parents=20, num_iterations=20)
   t.play()
   print(f"Time taken: {time.time() - start}\n")
 
   filename = 'results/best_strategies.json'
 
   t.write_best(filename, t.size)
-  strat = Strategy.from_json(candles, filename)[0]
+  strat = Strategy.from_json(train_candles, filename)[0]
+  strat.evaluate(True)
+
+  print_strategy(strat)
+
+  strat = Strategy.from_json(test_candles, filename)[0]
+  strat.evaluate()
 
   print_strategy(strat)
 

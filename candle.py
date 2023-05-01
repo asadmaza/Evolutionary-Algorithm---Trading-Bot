@@ -38,6 +38,16 @@ def get_candles(since: int = SINCE, fetch: bool = False, time: str = '1d', marke
     candles = pd.DataFrame(kraken.fetch_ohlcv(market, time, since), columns=COLUMNS)
     candles.to_csv('candles.csv', index=False)
     return candles
+  
+def get_candles_split(training = 0.8):
+  candles = get_candles()
+  n = len(candles)
+  train_end = int(n * training) # index of the last row in the training set
+  train_df = candles.iloc[:train_end].reset_index(drop=True) # select the first 80% of the rows
+  test_df = candles.iloc[train_end:].reset_index(drop=True) # select the last 20% of the rows
+  
+  return train_df, test_df
+
 
 if __name__ == '__main__':
   candles = get_candles()
@@ -46,3 +56,6 @@ if __name__ == '__main__':
   print(all(candles==candles2))
 
   print(min(c:=candles.iloc[:, 4]), max(c)) # print min and max of close price column
+
+  tr, te = (get_candles_split())
+  print(te.head())

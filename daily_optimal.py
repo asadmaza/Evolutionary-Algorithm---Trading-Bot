@@ -2,6 +2,7 @@
 An optimal bot that trades at the perfect times and is able to gain the maximum profit
 '''
 
+from candle import get_candles_split
 from strategy import Strategy
 from fitness import Fitness
 import indicator
@@ -34,10 +35,10 @@ if __name__ == '__main__':
   
   from candle import get_candles
 
-  candles = get_candles()
+  train_candles, test_candles = get_candles_split(0.2)
 
-  o = Optimal(candles)
+  o = Optimal(train_candles)
   portfolio = o.evaluate(False)
-  f = Fitness()
-  o.update_fitness(f.get_sharpe_raw(o))
+  f = Fitness(batches=4)
+  o.update_fitness(f.get_fitness(o))
   print(portfolio)

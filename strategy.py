@@ -156,7 +156,7 @@ class Strategy():
 
         if graph:
           print(f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
-          plt.plot((t), (self.close[t]), 'o', color='green', label='Sell' if not sold else '')
+          plt.plot((t), (self.close[t]), 'o', color='chartreuse', label='Sell' if not sold else '')
         base = 0
         sold += 1
 
@@ -178,7 +178,7 @@ class Strategy():
 
       if graph:
         print(f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close.iloc[-1]:.2f}')
-        plt.plot((len(self.close)-1), (self.close.iloc[-1]), 'o', color='green', label='Sell' if not sold else '')
+        plt.plot((len(self.close)-1), (self.close.iloc[-1]), 'o', color='chartreuse', label='Sell' if not sold else '')
 
     if graph:
       plt.legend()
