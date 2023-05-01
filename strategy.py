@@ -16,16 +16,17 @@ import uuid
 
 random.seed()
 
+
 class Strategy():
 
   def __init__(
-    self,
-    candles: pd.DataFrame,
-    buy_weights: list[float] = None,
-    sell_weights: list[float] = None,
-    params: list[dict] = None,
-    fitness: int = None,
-    market='BTC/AUD'
+      self,
+      candles: pd.DataFrame,
+      buy_weights: list[float] = None,
+      sell_weights: list[float] = None,
+      params: list[dict] = None,
+      fitness: int = None,
+      market='BTC/AUD'
   ) -> None:
     '''
     Parameters
@@ -47,22 +48,25 @@ class Strategy():
     self.close_prices = []
 
     self.candles = candles
-    self.close = self.candles.iloc[:, 4] # 5th column is close price
+    self.close = self.candles.iloc[:, 4]  # 5th column is close price
 
-    self.base, self.quote = market.split('/') # currencies
+    self.base, self.quote = market.split('/')  # currencies
 
     self.params = params or indicator.random_params()
 
     # if not given, weights are initialised randomly between -1 and 1
-    self.buy_weights = buy_weights or [random.randrange(-10, 11)/10 for _ in range(indicator.NUM_INDICATORS)]
-    self.sell_weights = sell_weights or [random.randrange(-10, 11)/10 for _ in range(indicator.NUM_INDICATORS)]
+    self.buy_weights = buy_weights or [
+        random.randrange(-10, 11) / 10 for _ in range(indicator.NUM_INDICATORS)]
+    self.sell_weights = sell_weights or [
+        random.randrange(-10, 11) / 10 for _ in range(indicator.NUM_INDICATORS)]
 
     self.indicators = indicator.get_indicators(self.candles, self.params)
 
     # could use these instead
-    self.normalised_indicators = [(ind - (m:=ind.min())) / (ind.max() - m) for ind in self.indicators]
+    self.normalised_indicators = [
+        (ind - (m := ind.min())) / (ind.max() - m) for ind in self.indicators]
 
-    self.portfolio = self.evaluate() # evaluate fitness once on init
+    self.portfolio = self.evaluate()  # evaluate fitness once on init
 
     self.fitness = fitness
 
@@ -80,14 +84,16 @@ class Strategy():
     '''
 
     # could use self.normalised_indicators here
-    return sum([self.buy_weights[i] * self.indicators[i][t] for i in range(indicator.NUM_INDICATORS)])
+    return sum([self.buy_weights[i] * self.indicators[i][t]
+               for i in range(indicator.NUM_INDICATORS)])
 
   def sell_sum(self, t: int) -> float:
     '''
     Return sell_weighted sum of indicators at time period t.
     '''
 
-    return sum([self.sell_weights[i] * self.indicators[i][t] for i in range(indicator.NUM_INDICATORS)])
+    return sum([self.sell_weights[i] * self.indicators[i][t]
+               for i in range(indicator.NUM_INDICATORS)])
 
   def buy_trigger(self, t: int) -> bool:
     '''
@@ -95,15 +101,15 @@ class Strategy():
     Returns True if buy-weighted sum of indicators is positive, else False.
     '''
 
-    return self.buy_sum(t) > 0 and self.buy_sum(t-1) <= 0
-  
+    return self.buy_sum(t) > 0 and self.buy_sum(t - 1) <= 0
+
   def sell_trigger(self, t: int) -> bool:
     '''
     Return True if should sell at time period t, else False.
     Returns True if sell-weighted sum of indicators is positive, else False.
     '''
 
-    return self.sell_sum(t) > 0 and self.sell_sum(t-1) <= 0
+    return self.sell_sum(t) > 0 and self.sell_sum(t - 1) <= 0
 
   def evaluate(self, graph: bool = False) -> float:
     '''
@@ -120,7 +126,8 @@ class Strategy():
 
     if graph:
       plt.plot(self.close, label='Close price')
-      for i in range(indicator.NUM_INDICATORS): plt.plot(self.indicators[i], label=indicator.INDICATORS[i].name)
+      for i in range(indicator.NUM_INDICATORS):
+        plt.plot(self.indicators[i], label=indicator.INDICATORS[i].name)
 
     quote = 100
     portfolio = quote
@@ -128,35 +135,46 @@ class Strategy():
     bought, sold = 0, 0
     self.close_prices = []
 
-
     self.close_prices.append(portfolio)
 
     for t in range(1, len(self.close)):
 
       if bought == sold and self.buy_trigger(t):
         quote *= 0.98
-        
+
         base += quote / self.close[t]
         portfolio = quote
         self.close_prices.append(portfolio)
 
         if graph:
-          print(f'Bought {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
-          plt.plot((t), (self.close[t]), 'o', color='red', label='Buy' if not bought else '')
+          print(
+              f'Bought {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
+          plt.plot(
+              (t),
+              (self.close[t]),
+              'o',
+              color='red',
+              label='Buy' if not bought else '')
         quote = 0
         bought += 1
 
-      elif bought > sold and self.sell_trigger(t): # must buy before selling
+      elif bought > sold and self.sell_trigger(t):  # must buy before selling
         quote += base * self.close[t]
-        
+
         quote *= 0.98
 
         portfolio = quote
         self.close_prices.append(portfolio)
 
         if graph:
-          print(f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
-          plt.plot((t), (self.close[t]), 'o', color='chartreuse', label='Sell' if not sold else '')
+          print(
+              f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}')
+          plt.plot(
+              (t),
+              (self.close[t]),
+              'o',
+              color='chartreuse',
+              label='Sell' if not sold else '')
         base = 0
         sold += 1
 
@@ -165,20 +183,23 @@ class Strategy():
         portfolio = temp
         self.close_prices.append(portfolio)
 
-
-
     # if haven't sold, sell in last time period
     if base:
       quote += base * self.close.iloc[-1]
-      
+
       quote *= 0.98
 
       portfolio = quote
       self.close_prices.append(portfolio)
 
       if graph:
-        print(f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close.iloc[-1]:.2f}')
-        plt.plot((len(self.close)-1), (self.close.iloc[-1]), 'o', color='chartreuse', label='Sell' if not sold else '')
+        print(
+            f'Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close.iloc[-1]:.2f}')
+        plt.plot((len(self.close) - 1),
+                 (self.close.iloc[-1]),
+                 'o',
+                 color='chartreuse',
+                 label='Sell' if not sold else '')
 
     if graph:
       plt.legend()
@@ -186,7 +207,7 @@ class Strategy():
 
     self.portfolio = quote
     return quote
-  
+
   def mutate(self, weight_prob=0.5, param_prob=0.5) -> 'Strategy':
     '''
     Return a new Strategy with randomly mutated weights and params.
@@ -196,8 +217,10 @@ class Strategy():
     buy_weights, sell_weights = self.buy_weights.copy(), self.sell_weights.copy()
     ds = [-0.1, 0.1]
     for i in range(indicator.NUM_INDICATORS):
-      if random.random() > weight_prob: buy_weights[i] += random.choice(ds)
-      if random.random() > weight_prob: sell_weights[i] += random.choice(ds)
+      if random.random() > weight_prob:
+        buy_weights[i] += random.choice(ds)
+      if random.random() > weight_prob:
+        sell_weights[i] += random.choice(ds)
 
     # mutate params
     params = indicator.mutate_params(self.params, param_prob)
@@ -209,34 +232,48 @@ class Strategy():
     Return a dict of the minimum data needed to represent this strategy, as well as the fitness.
     '''
 
-    return { 'buy_weights': self.buy_weights, 'sell_weights': self.sell_weights, 'params': self.params, 'portfolio': self.portfolio, 'fitness': self.fitness }
-  
+    return {
+        'buy_weights': self.buy_weights,
+        'sell_weights': self.sell_weights,
+        'params': self.params,
+        'portfolio': self.portfolio,
+        'fitness': self.fitness}
+
   @classmethod
-  def from_json(self, candles: pd.DataFrame, filename: str, n: int = 1) -> list['Strategy']:
+  def from_json(
+          self,
+          candles: pd.DataFrame,
+          filename: str,
+          n: int = 1) -> list['Strategy']:
     '''
     Return a list of n Strategy objects from json file data.
     '''
 
     with open(filename, 'r') as f:
       data = json.load(f)
-      return [Strategy(candles, d['buy_weights'], d['sell_weights'], d['params'], d['fitness']) for d in data][:n]
+      return [Strategy(candles,
+                       d['buy_weights'],
+                       d['sell_weights'],
+                       d['params'],
+                       d['fitness']) for d in data][:n]
 
   def __repr__(self) -> str:
     return f'<{self.__class__.__name__} {self.to_json()}>'
+
 
 if __name__ == '__main__':
   '''
   Testing
   '''
-  
+
   from candle import get_candles
 
   candles = get_candles()
 
   # example params
   params = [
-    {'window': 20}, # SMA
-    {'window': 10}, # EMA
+      {'window': 20},  # SMA
+      {'window': 10},  # EMA
   ]
   buy_weights = [-1, 1]
   sell_weights = [1, -1]
@@ -251,6 +288,6 @@ if __name__ == '__main__':
   # params from json file
   filename = 'results/best_strategies.json'
   strat3 = Strategy.from_json(candles, filename)[0]
-  
+
   print('Strategy 3')
   strat3.evaluate(graph=True)

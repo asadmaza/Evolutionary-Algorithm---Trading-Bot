@@ -13,9 +13,15 @@ import time
 
 random.seed()
 
+
 class Tournament():
-  
-  def __init__(self, candles: pd.DataFrame, size: int, num_parents: int, num_iterations: int) -> None:
+
+  def __init__(
+          self,
+          candles: pd.DataFrame,
+          size: int,
+          num_parents: int,
+          num_iterations: int) -> None:
     '''
     Parameters
     ----------
@@ -32,15 +38,16 @@ class Tournament():
     '''
 
     self.size = size
-    self.num_parents = num_parents # must be less than half the size
+    self.num_parents = num_parents  # must be less than half the size
     self.num_iterations = num_iterations
 
     self.strats = []
 
     buy_weights, sell_weights = [-1, 1], [1, -1]
-    for _ in range(self.size // 2): # assume size is even
+    for _ in range(self.size // 2):  # assume size is even
       self.strats.append(Strategy(candles))
-      self.strats.append(Strategy(candles, buy_weights, sell_weights)) # seed half the population with 'good' weights
+      # seed half the population with 'good' weights
+      self.strats.append(Strategy(candles, buy_weights, sell_weights))
 
     self.fitness = Fitness(self.strats, batches=4)
 
@@ -53,7 +60,6 @@ class Tournament():
      - 'kill off' the worst (self.num_parents) strategies.
     '''
 
-
     for n in range(self.num_iterations):
 
       self.fitness.update_generation(self.strats)
@@ -61,18 +67,21 @@ class Tournament():
       for s in self.strats:
         s.update_fitness(self.fitness.get_fitness(s))
 
-      self.strats.sort(key=lambda s: s.fitness, reverse=True) # best strategies sorted to the top
+      # best strategies sorted to the top
+      self.strats.sort(key=lambda s: s.fitness, reverse=True)
 
-      if n < self.num_iterations-1: # Not the last generation
-        self.strats = self.strats[:-self.num_parents] # kill off the worst
-        self.strats.extend([s.mutate() for s in self.strats[:self.num_parents]]) # add mutations of the best
-
+      if n < self.num_iterations - 1:  # Not the last generation
+        self.strats = self.strats[:-self.num_parents]  # kill off the worst
+        # add mutations of the best
+        self.strats.extend([s.mutate()
+                           for s in self.strats[:self.num_parents]])
 
       # self.fitness.generate_generation_graph()
     self.fitness.generate_average_graph()
     self.fitness.generate_average_graph(type="portfolio")
 
-      # could also add more random strategies back into the population at each iteration
+    # could also add more random strategies back into the population at each
+    # iteration
 
   def best_strategies(self, n: int = 1) -> list[Strategy]:
     '''
@@ -88,21 +97,22 @@ class Tournament():
       json.dump([s.to_json() for s in self.best_strategies(n)], f, indent=2)
 
 
-
 def print_strategy(strategy):
-    buy_weights = [round(weight, 3) for weight in strategy.buy_weights]
-    sell_weights = [round(weight, 3) for weight in strategy.sell_weights]
-    params = [{k: round(v, 3) for k, v in param.items()} for param in strategy.params]
-    portfolio = round(strategy.portfolio, 2)
-    fitness = round(strategy.fitness, 3)
-    
-    print(f"--- Best Strategy ---\n"
-          f"Buy weights: {buy_weights}\n"
-          f"Sell weights: {sell_weights}\n"
-          f"Parameters: {params}\n"
-          f"Portfolio value: {portfolio}\n"
-          f"Fitness: {fitness}\n"
-          f"----------------\n")
+  buy_weights = [round(weight, 3) for weight in strategy.buy_weights]
+  sell_weights = [round(weight, 3) for weight in strategy.sell_weights]
+  params = [{k: round(v, 3) for k, v in param.items()}
+            for param in strategy.params]
+  portfolio = round(strategy.portfolio, 2)
+  fitness = round(strategy.fitness, 3)
+
+  print(f"--- Best Strategy ---\n"
+        f"Buy weights: {buy_weights}\n"
+        f"Sell weights: {sell_weights}\n"
+        f"Parameters: {params}\n"
+        f"Portfolio value: {portfolio}\n"
+        f"Fitness: {fitness}\n"
+        f"----------------\n")
+
 
 if __name__ == '__main__':
   '''
@@ -128,7 +138,3 @@ if __name__ == '__main__':
   strat.evaluate()
 
   print_strategy(strat)
-
-
-
-  
