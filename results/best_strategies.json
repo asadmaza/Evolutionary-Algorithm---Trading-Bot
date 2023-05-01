@@ -1,364 +1,63 @@
 [
   {
     "buy_weights": [
-      -0.9,
-      0.8
+      -1.0,
+      0.9
     ],
     "sell_weights": [
       1.3000000000000003,
-      -1.0
-    ],
-    "params": [
-      {
-        "window": 83
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 208.2522531144974
-  },
-  {
-    "buy_weights": [
-      -0.9,
-      0.8
-    ],
-    "sell_weights": [
-      1.3000000000000003,
-      -1.0
-    ],
-    "params": [
-      {
-        "window": 83
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 200.0832512410352
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.1,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 191.67813688835344
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.1,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 191.67813688835344
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.1,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 191.67813688835344
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.1,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 191.67813688835344
-  },
-  {
-    "buy_weights": [
-      -0.8,
-      0.7000000000000001
-    ],
-    "sell_weights": [
-      1.3000000000000003,
-      -1.0
-    ],
-    "params": [
-      {
-        "window": 83
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 190.1876093214587
-  },
-  {
-    "buy_weights": [
-      -0.8,
-      0.7000000000000001
-    ],
-    "sell_weights": [
-      1.4000000000000004,
-      -1.1
-    ],
-    "params": [
-      {
-        "window": 83
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 191.2435668576231
-  },
-  {
-    "buy_weights": [
-      -0.7000000000000001,
-      0.6000000000000001
-    ],
-    "sell_weights": [
-      1.4000000000000004,
-      -1.1
-    ],
-    "params": [
-      {
-        "window": 81
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 186.5578504844924
-  },
-  {
-    "buy_weights": [
-      -0.8,
-      0.7000000000000001
-    ],
-    "sell_weights": [
-      1.3000000000000003,
-      -1.0
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 167.21451383267964
-  },
-  {
-    "buy_weights": [
-      -0.8,
-      0.7000000000000001
-    ],
-    "sell_weights": [
-      1.1,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 74
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 158.53368139901534
-  },
-  {
-    "buy_weights": [
-      -0.9,
-      0.8
-    ],
-    "sell_weights": [
-      1.2000000000000002,
-      -1.0
-    ],
-    "params": [
-      {
-        "window": 83
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 166.4971005258376
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.0,
-      -1.1
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 179.80492321772064
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.1,
       -1.2000000000000002
     ],
     "params": [
       {
-        "window": 86
+        "window": 24
       },
       {
-        "window": 2
+        "window": 42
       }
     ],
-    "fitness": 179.80492321772064
+    "portfolio": 119.98828977484432,
+    "fitness": 0.04552562815764845
   },
   {
     "buy_weights": [
-      -1.0,
-      0.9
+      -1.2000000000000002,
+      1.1
     ],
     "sell_weights": [
       1.1,
-      -1.2000000000000002
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 179.80492321772064
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.0,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 164.17511890808703
-  },
-  {
-    "buy_weights": [
-      -0.9,
-      0.8
-    ],
-    "sell_weights": [
-      1.2000000000000002,
-      -1
-    ],
-    "params": [
-      {
-        "window": 100
-      },
-      {
-        "window": 23
-      }
-    ],
-    "fitness": 143.47416640126667
-  },
-  {
-    "buy_weights": [
-      -0.9,
-      0.8
-    ],
-    "sell_weights": [
-      1.2000000000000002,
-      -1
-    ],
-    "params": [
-      {
-        "window": 100
-      },
-      {
-        "window": 23
-      }
-    ],
-    "fitness": 143.47416640126667
-  },
-  {
-    "buy_weights": [
-      -0.9,
-      0.8
-    ],
-    "sell_weights": [
-      1.0,
       -1.1
     ],
     "params": [
       {
-        "window": 81
+        "window": 73
       },
       {
-        "window": 1
+        "window": 24
       }
     ],
-    "fitness": 172.90734959528763
+    "portfolio": 161.27741335856095,
+    "fitness": 0.04529079876906083
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1.1
+    ],
+    "sell_weights": [
+      1.1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 73
+      },
+      {
+        "window": 21
+      }
+    ],
+    "portfolio": 161.24258794834762,
+    "fitness": 0.045259226429911786
   },
   {
     "buy_weights": [
@@ -367,424 +66,6 @@
     ],
     "sell_weights": [
       1,
-      -1
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 157.5408201425902
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      0.9,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 157.5408201425902
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.0,
-      -1
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 157.5408201425902
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      0.8,
-      -0.8
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 157.5408201425902
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      0.9,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 157.5408201425902
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      0.9,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 157.5408201425902
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      0.8,
-      -0.8
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 157.5408201425902
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      0.9,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 157.5408201425902
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.1,
-      -1.1
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 157.5408201425902
-  },
-  {
-    "buy_weights": [
-      -0.9,
-      0.8
-    ],
-    "sell_weights": [
-      1.2000000000000002,
-      -1
-    ],
-    "params": [
-      {
-        "window": 100
-      },
-      {
-        "window": 21
-      }
-    ],
-    "fitness": 138.70299562479482
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.9
-    ],
-    "sell_weights": [
-      1.0,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 158.80792510197747
-  },
-  {
-    "buy_weights": [
-      -1.2000000000000002,
-      1.0
-    ],
-    "sell_weights": [
-      0.8,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 61
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 168.25847118288274
-  },
-  {
-    "buy_weights": [
-      -0.9,
-      0.8
-    ],
-    "sell_weights": [
-      1.1,
-      -1.1
-    ],
-    "params": [
-      {
-        "window": 94
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 160.6123130886058
-  },
-  {
-    "buy_weights": [
-      -0.9,
-      0.9
-    ],
-    "sell_weights": [
-      1.0,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 77
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 156.24603197327949
-  },
-  {
-    "buy_weights": [
-      -1.1,
-      1.0
-    ],
-    "sell_weights": [
-      0.9,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 141.7494340676202
-  },
-  {
-    "buy_weights": [
-      -0.7000000000000001,
-      0.6000000000000001
-    ],
-    "sell_weights": [
-      1.4000000000000004,
-      -1.2000000000000002
-    ],
-    "params": [
-      {
-        "window": 89
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 128.82043809757445
-  },
-  {
-    "buy_weights": [
-      -1.1,
-      1.0
-    ],
-    "sell_weights": [
-      1.1,
-      -1.3000000000000003
-    ],
-    "params": [
-      {
-        "window": 77
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 120.88190904776548
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.8
-    ],
-    "sell_weights": [
-      1.0,
-      -1.0
-    ],
-    "params": [
-      {
-        "window": 81
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 116.99582813173505
-  },
-  {
-    "buy_weights": [
-      -1.1,
-      0.9
-    ],
-    "sell_weights": [
-      1.0,
-      -1.0
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 113.3045120100763
-  },
-  {
-    "buy_weights": [
-      -0.8,
-      0.8
-    ],
-    "sell_weights": [
-      1.5000000000000004,
-      -1.1
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 109.60817004980782
-  },
-  {
-    "buy_weights": [
-      -0.9,
-      0.7000000000000001
-    ],
-    "sell_weights": [
-      1.2000000000000002,
-      -1.1
-    ],
-    "params": [
-      {
-        "window": 91
-      },
-      {
-        "window": 1
-      }
-    ],
-    "fitness": 102.34520041103094
-  },
-  {
-    "buy_weights": [
-      -1.1,
-      0.9
-    ],
-    "sell_weights": [
-      1.1,
-      -1.0
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 100.85193333744748
-  },
-  {
-    "buy_weights": [
-      -1.0,
-      0.7000000000000001
-    ],
-    "sell_weights": [
-      1.2000000000000002,
       -1.0
     ],
     "params": [
@@ -792,72 +73,516 @@
         "window": 74
       },
       {
-        "window": 1
+        "window": 29
       }
     ],
-    "fitness": 100
+    "portfolio": 159.93290916572414,
+    "fitness": 0.044906920844868144
+  },
+  {
+    "buy_weights": [
+      -1.3000000000000003,
+      1.2000000000000002
+    ],
+    "sell_weights": [
+      1.1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 73
+      },
+      {
+        "window": 24
+      }
+    ],
+    "portfolio": 159.72130250603482,
+    "fitness": 0.044485559626170824
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 45
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 24
+      },
+      {
+        "window": 40
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1.1
+    ],
+    "sell_weights": [
+      1.0,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 25
+      },
+      {
+        "window": 41
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1.1,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1.0,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
   },
   {
     "buy_weights": [
       -1.0,
-      0.7000000000000001
+      0.9
+    ],
+    "sell_weights": [
+      0.9,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 21
+      },
+      {
+        "window": 33
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
+    ],
+    "sell_weights": [
+      1.1,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 24
+      },
+      {
+        "window": 42
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
     ],
     "sell_weights": [
       1.2000000000000002,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 24
+      },
+      {
+        "window": 42
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
+    ],
+    "sell_weights": [
+      0.9,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 24
+      },
+      {
+        "window": 42
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      0.8,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 45
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1.1,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
+    ],
+    "sell_weights": [
+      0.8,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 24
+      },
+      {
+        "window": 42
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1.1,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1.0,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
+    ],
+    "sell_weights": [
+      0.8,
       -0.9
     ],
     "params": [
       {
-        "window": 83
+        "window": 24
       },
       {
-        "window": 1
+        "window": 42
       }
     ],
-    "fitness": 100
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 45
+      }
+    ],
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
   },
   {
     "buy_weights": [
       -1.0,
-      0.8
+      0.9
     ],
     "sell_weights": [
-      1.2000000000000002,
-      -1
+      1.4000000000000004,
+      -1.2000000000000002
     ],
     "params": [
       {
-        "window": 100
+        "window": 24
       },
       {
-        "window": 23
+        "window": 42
       }
     ],
-    "fitness": 100
+    "portfolio": 157.47272049821686,
+    "fitness": 0.043362215122445674
   },
   {
     "buy_weights": [
-      -0.9,
-      0.7000000000000001
+      -1.1,
+      1
     ],
     "sell_weights": [
-      1.3000000000000003,
-      -1
+      1,
+      -1.1
     ],
     "params": [
       {
-        "window": 90
+        "window": 24
       },
       {
-        "window": 20
+        "window": 42
       }
     ],
-    "fitness": 100
+    "portfolio": 156.97195653404268,
+    "fitness": 0.04310398449916441
   },
   {
     "buy_weights": [
-      -1.0,
-      1.0
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 24
+      },
+      {
+        "window": 42
+      }
+    ],
+    "portfolio": 156.97195653404268,
+    "fitness": 0.04310398449916441
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 21
+      },
+      {
+        "window": 33
+      }
+    ],
+    "portfolio": 156.97195653404268,
+    "fitness": 0.04310398449916441
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
     ],
     "sell_weights": [
       0.9,
@@ -865,59 +590,202 @@
     ],
     "params": [
       {
-        "window": 86
+        "window": 24
       },
       {
-        "window": 2
+        "window": 42
       }
     ],
-    "fitness": 85.34964660135388
+    "portfolio": 156.97195653404268,
+    "fitness": 0.04310398449916441
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1.1
+    ],
+    "sell_weights": [
+      1.1,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 21
+      },
+      {
+        "window": 32
+      }
+    ],
+    "portfolio": 156.97195653404268,
+    "fitness": 0.04310398449916441
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 24
+      },
+      {
+        "window": 44
+      }
+    ],
+    "portfolio": 154.2568131256952,
+    "fitness": 0.04167587052283434
   },
   {
     "buy_weights": [
       -1.0,
-      0.8
+      0.9
     ],
     "sell_weights": [
-      1.0,
-      -0.9
-    ],
-    "params": [
-      {
-        "window": 86
-      },
-      {
-        "window": 2
-      }
-    ],
-    "fitness": 91.36010303852467
-  },
-  {
-    "buy_weights": [
-      -0.7000000000000001,
-      0.6000000000000001
-    ],
-    "sell_weights": [
-      1.3000000000000003,
+      0.8,
       -1.0
     ],
     "params": [
       {
-        "window": 83
+        "window": 24
       },
       {
-        "window": 1
+        "window": 46
       }
     ],
-    "fitness": 66.64920247248014
+    "portfolio": 154.2568131256952,
+    "fitness": 0.04167587052283434
   },
   {
     "buy_weights": [
-      -0.8,
-      0.8
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 28
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 149.34274733632625,
+    "fitness": 0.03916469307216179
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      1.0,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 28
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 149.34274733632625,
+    "fitness": 0.03916469307216179
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1
+    ],
+    "sell_weights": [
+      0.8,
+      -1.4000000000000004
+    ],
+    "params": [
+      {
+        "window": 28
+      },
+      {
+        "window": 45
+      }
+    ],
+    "portfolio": 149.34274733632625,
+    "fitness": 0.03916469307216179
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
     ],
     "sell_weights": [
       1.2000000000000002,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 24
+      },
+      {
+        "window": 42
+      }
+    ],
+    "portfolio": 120.11106971132521,
+    "fitness": 0.036272859618807045
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
+    ],
+    "sell_weights": [
+      1.2000000000000002,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 28
+      },
+      {
+        "window": 41
+      }
+    ],
+    "portfolio": 140.83293927978647,
+    "fitness": 0.03449808540658016
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1.1
+    ],
+    "sell_weights": [
+      1,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 28
+      },
+      {
+        "window": 41
+      }
+    ],
+    "portfolio": 140.52967087950194,
+    "fitness": 0.034321057256018264
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.8
+    ],
+    "sell_weights": [
+      1,
       -1.0
     ],
     "params": [
@@ -925,28 +793,210 @@
         "window": 81
       },
       {
-        "window": 2
+        "window": 29
       }
     ],
-    "fitness": 68.26190999148574
+    "portfolio": 140.21576827484157,
+    "fitness": 0.03420774037592666
   },
   {
     "buy_weights": [
-      -0.8,
-      0.8
+      -1.1,
+      1
     ],
     "sell_weights": [
-      1.3000000000000003,
+      0.9,
       -1.1
     ],
     "params": [
       {
-        "window": 83
+        "window": 26
       },
       {
-        "window": 1
+        "window": 50
       }
     ],
-    "fitness": 66.81198817482279
+    "portfolio": 106.89318774704985,
+    "fitness": 0.012872414793707888
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      0.9
+    ],
+    "sell_weights": [
+      0.8,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 28
+      },
+      {
+        "window": 45
+      }
+    ],
+    "portfolio": 100,
+    "fitness": 0
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1
+    ],
+    "sell_weights": [
+      0.8,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 100,
+    "fitness": 0
+  },
+  {
+    "buy_weights": [
+      -1.0,
+      0.9
+    ],
+    "sell_weights": [
+      1.0,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 21
+      },
+      {
+        "window": 29
+      }
+    ],
+    "portfolio": 100,
+    "fitness": 0
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      0.9
+    ],
+    "sell_weights": [
+      1.0,
+      -1.2000000000000002
+    ],
+    "params": [
+      {
+        "window": 24
+      },
+      {
+        "window": 42
+      }
+    ],
+    "portfolio": 100,
+    "fitness": 0
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      0.9
+    ],
+    "sell_weights": [
+      1.1,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 46
+      }
+    ],
+    "portfolio": 100,
+    "fitness": 0
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.9
+    ],
+    "sell_weights": [
+      1.3000000000000003,
+      -1.3000000000000003
+    ],
+    "params": [
+      {
+        "window": 21
+      },
+      {
+        "window": 42
+      }
+    ],
+    "portfolio": 84.08500238415135,
+    "fitness": -0.001987930109357197
+  },
+  {
+    "buy_weights": [
+      -1.1,
+      1.1
+    ],
+    "sell_weights": [
+      0.9,
+      -1.1
+    ],
+    "params": [
+      {
+        "window": 27
+      },
+      {
+        "window": 41
+      }
+    ],
+    "portfolio": 66.78113732265074,
+    "fitness": -0.007975883402242001
+  },
+  {
+    "buy_weights": [
+      -0.9,
+      0.9
+    ],
+    "sell_weights": [
+      0.8,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 26
+      },
+      {
+        "window": 42
+      }
+    ],
+    "portfolio": 66.78113732265074,
+    "fitness": -0.007975883402242001
+  },
+  {
+    "buy_weights": [
+      -1.2000000000000002,
+      1.2000000000000002
+    ],
+    "sell_weights": [
+      1.1,
+      -1.0
+    ],
+    "params": [
+      {
+        "window": 80
+      },
+      {
+        "window": 21
+      }
+    ],
+    "portfolio": 55.074553086387795,
+    "fitness": -0.02671144735853315
   }
 ]
