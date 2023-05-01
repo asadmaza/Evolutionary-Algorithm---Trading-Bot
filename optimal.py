@@ -3,6 +3,7 @@ An optimal bot that trades at the perfect times and is able to gain the maximum 
 '''
 
 from strategy import Strategy
+from fitness import Fitness
 import indicator
 
 class Optimal(Strategy):
@@ -37,5 +38,8 @@ if __name__ == '__main__':
   candles = get_candles()
 
   o = Optimal(candles)
-  quote = o.evaluate(False)
-  print(quote)
+  portfolio = o.evaluate(True)
+  f = Fitness()
+  o.update_fitness(f.get_sharpe_raw(o))
+  print(portfolio)
+  print(o.portfolio)

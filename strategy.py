@@ -132,6 +132,8 @@ class Strategy():
     for t in range(1, len(self.close)):
 
       if bought == sold and self.buy_trigger(t):
+        quote *= 0.98
+        
         base += quote / self.close[t]
         portfolio = quote
         self.close_prices.append(portfolio)
@@ -144,6 +146,9 @@ class Strategy():
 
       elif bought > sold and self.sell_trigger(t): # must buy before selling
         quote += base * self.close[t]
+        
+        quote *= 0.98
+
         portfolio = quote
         self.close_prices.append(portfolio)
 
@@ -163,6 +168,9 @@ class Strategy():
     # if haven't sold, sell in last time period
     if base:
       quote += base * self.close.iloc[-1]
+      
+      quote *= 0.98
+
       portfolio = quote
       self.close_prices.append(portfolio)
 
@@ -174,6 +182,7 @@ class Strategy():
       plt.legend()
       plt.show(block=True)
 
+    self.portfolio = quote
     return quote
   
   def mutate(self, weight_prob=0.5, param_prob=0.5) -> 'Strategy':

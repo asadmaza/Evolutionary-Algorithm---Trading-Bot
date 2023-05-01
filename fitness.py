@@ -11,12 +11,14 @@ import matplotlib.pyplot as plt
 import copy
 
 class Fitness():
-    def __init__(self, strats) -> None:
+    def __init__(self, strats=[]) -> None:
         self.strats = copy.deepcopy(strats)
         self.generation = 0
 
         self.fitness = {}
         self.portfolio = {}
+
+        self.single = not len(strats)
 
     def update_generation(self, strats):
         self.generation += 1
@@ -57,8 +59,9 @@ class Fitness():
         if not std_dev_daily_return == 0:
             sharpe_ratio = (avg_daily_return - self.rf) / std_dev_daily_return
 
-        self.fitness[self.generation].append(sharpe_ratio)
-        self.portfolio[self.generation].append(strat.portfolio)
+        if not self.single:
+            self.fitness[self.generation].append(sharpe_ratio)
+            self.portfolio[self.generation].append(strat.portfolio)
 
         return sharpe_ratio
     
@@ -88,7 +91,6 @@ class Fitness():
 
         plt.show()
         
-
 
 from candle import get_candles
 
