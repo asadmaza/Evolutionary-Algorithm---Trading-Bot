@@ -86,7 +86,13 @@ def random_ma_params() -> dict:
 INDICATORS = [
     Indicator("SMA", ta.trend.sma_indicator, ["close"], mutate_ma, random_ma_params),
     Indicator("EMA", ta.trend.ema_indicator, ["close"], mutate_ma, random_ma_params),
-    Indicator("Bollinger_lower", ta.volatility.bollinger_lband, ["close"], );
+    Indicator(
+        "Bollinger_lower",
+        ta.volatility.bollinger_lband,
+        ["close"],
+        mutate_bollinger,
+        random_bollinger_params,
+    ),
     # Indicator('ADX', ta.trend.adx, ['high', 'low', 'close'], )
 ]
 
