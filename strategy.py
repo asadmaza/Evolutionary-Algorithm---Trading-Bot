@@ -7,37 +7,33 @@ Ideas:
 - Could have separate indicators with separate params for buy and sell triggers.
 """
 
+from indicator import mutate
 import pandas as pd
-import numpy as np
 from matplotlib import pyplot as plt
 import random
 import json
-import indicator
-
-random.seed()
+from ta.trend import sma_indicator, ema_indicator
+from ta.volatility import bollinger_lband, bollinger_hband
 
 
 class Strategy:
+    WIN_MAX = 30  # Max window size for indicators when initialising
+    WIN_DEV_MAX = 5  # Max window deviation for indicators when initialising
+    CONST_MAX = 3  # Max constant for indicators when initialising
+
     def __init__(
         self,
         candles: pd.DataFrame,
-        params: list[dict] = None,
+        chromosome: dict[str, int | float] | None = None,
         market="BTC/AUD",
     ) -> None:
         """
+        Init a Strategy with randomised indicator params.
+
         Parameters
         ----------
           candles : pandas.DataFrame
             A DataFrame containing ohlcv data.
-
-          params : list[dict]
-            A list of dicts, where each dict contains the keyword arguments to pass to the corresponding indicator. The list of indicators are in indicator.py.
-
-          buy_weights : list[float]
-            A list of weights to be applied to each indicator in the buy sum.
-
-          sell_weights : list[float]
-            A list of weights to be applied to each indicator in the sell sum.
         """
 
         self.candles = candles
@@ -45,26 +41,50 @@ class Strategy:
 
         self.base, self.quote = market.split("/")  # currencies
 
-        self.params = params or indicator.random_params()
-        self.constants = np.round(np.random.uniform(0, 3, 6), 2)  # 6 constants
-        self.indicators = indicator.get_indicators(self.candles, self.params)
+        # Chromosome = 5 window sizes + 2 window deviations + 6 constants
+        self.n_indicators = 5
+        self.chromosome = chromosome or {
+            "window_sizes": [
+                random.randint(1, self.WIN_MAX) for _ in range(self.n_indicators)
+            ],
+            "window_devs": [
+                round(random.uniform(1, self.WIN_DEV_MAX), 1) for _ in range(2)
+            ],
+            "constants": [
+                round(random.uniform(0, self.CONST_MAX), 2) for _ in range(6)
+            ],
+        }
+        self.set_indicators(self.chromosome)
 
         self.fitness = self.evaluate()  # evaluate fitness once on init
+
+    def set_indicators(self, chromosome: dict[str, int | float]):
+        """Given a chromosome, set all indicators."""
+        self.sma1 = sma_indicator(self.close, window=chromosome["window_sizes"][0])
+        self.sma2 = sma_indicator(self.close, window=chromosome["window_sizes"][1])
+        self.ema = ema_indicator(self.close, window=chromosome["window_sizes"][2])
+        self.bollinger_lband = bollinger_lband(
+            self.close,
+            window=chromosome["window_sizes"][3],
+            window_dev=chromosome["window_devs"][0],
+        )
+        self.bollinger_hband = bollinger_hband(
+            self.close,
+            window=chromosome["window_sizes"][4],
+            window_dev=chromosome["window_devs"][1],
+        )
 
     def buy_trigger(self, t: int) -> bool:
         """
         Return True if should buy at time period t, else False.
         """
         return (
-            (
-                self.indicators["SMA1"][t]
-                > self.constants[0] * self.indicators["SMA2"][t]
-            )
-            and (self.close[t] > self.constants[1] * self.indicators["EMA"][t])
+            (self.sma1[t] > self.chromosome["constants"][0] * self.sma2[t])
+            and (self.close[t] > self.chromosome["constants"][1] * self.ema[t])
             # TODO: is close < c bollinger_low or close > c bollinger_low?
             and (
                 self.close[t]
-                > self.constants[2] * self.indicators["Bollinger_lower"][t]
+                > self.chromosome["constants"][2] * self.bollinger_lband[t]
             )
         )
 
@@ -73,14 +93,11 @@ class Strategy:
         Return True if should sell at time period t, else False.
         """
         return (
-            (
-                self.indicators["SMA2"][t]
-                > self.constants[3] * self.indicators["SMA1"][t]
-            )
-            and (self.indicators["EMA"][t] > self.constants[4] * self.close[t])
+            (self.sma2[t] > self.chromosome["constants"][3] * self.sma1[t])
+            and (self.ema[t] > self.chromosome["constants"][4] * self.close[t])
             and (
                 self.close[t]
-                > self.constants[5] * self.indicators["Bollinger_higher"][t]
+                > self.chromosome["constants"][5] * self.bollinger_hband[t]
             )
         )
 
@@ -99,8 +116,19 @@ class Strategy:
 
         if graph:
             plt.plot(self.close, label="Close price")
-            for i in range(indicator.NUM_INDICATORS):
-                plt.plot(self.indicators[i], label=indicator.INDICATORS[i].name)
+            for i in range(self.n_indicators):
+                plt.plot(
+                    [
+                        self.sma1,
+                        self.sma2,
+                        self.ema,
+                        self.bollinger_lband,
+                        self.bollinger_hband,
+                    ][i],
+                    label=["SMA1", "SMA2", "EMA", "Bollinger Lband", "Bollinger Hband"][
+                        i
+                    ],
+                )
 
         quote = 100
         base = 0
@@ -108,6 +136,7 @@ class Strategy:
 
         for t in range(1, len(self.close)):
             if bought == sold and self.buy_trigger(t):
+                print("buying")
                 base += quote / self.close[t]
                 if graph:
                     print(
@@ -124,6 +153,7 @@ class Strategy:
                 bought += 1
 
             elif bought > sold and self.sell_trigger(t):  # must buy before selling
+                print("selling")
                 quote += base * self.close[t]
                 if graph:
                     print(
@@ -160,23 +190,25 @@ class Strategy:
 
         return quote
 
-    def mutate(self, weight_prob=0.5, param_prob=0.5) -> "Strategy":
+    def mutate(self, prob=0.09) -> "Strategy":
         """
         Return a new Strategy with randomly mutated weights and params.
         """
-
-        buy_weights, sell_weights = self.buy_weights.copy(), self.sell_weights.copy()
-        ds = [-0.1, 0.1]
-        for i in range(indicator.NUM_INDICATORS):
-            if random.random() > weight_prob:
-                buy_weights[i] += random.choice(ds)
-            if random.random() > weight_prob:
-                sell_weights[i] += random.choice(ds)
-
-        # mutate params
-        params = indicator.mutate_params(self.params, param_prob)
-
-        return Strategy(self.candles, buy_weights, sell_weights, params)
+        for name in self.chromosome.keys():
+            if random.uniform(0, 1) < prob:
+                match name:
+                    case "window":
+                        low = 1
+                        high = self.WIN_MAX
+                    case "window_dev":
+                        low = 1
+                        high = self.WIN_DEV_MAX
+                    case "constant":
+                        low = 0
+                        high = self.CONST_MAX
+                self.chromosome[name] = mutate(self.chromosome[name], name, low, high)
+        self.set_indicators(self.chromosome)
+        self.fitness = self.evaluate()
 
     def to_json(self) -> dict:
         """
@@ -184,9 +216,9 @@ class Strategy:
         """
 
         return {
-            "buy_weights": self.buy_weights,
-            "sell_weights": self.sell_weights,
-            "params": self.params,
+            "window_sizes": self.chromosome["window_sizes"],
+            "window_devs": self.chromosome["window_devs"],
+            "constants": self.chromosome["constants"],
             "fitness": self.fitness,
         }
 
@@ -200,10 +232,7 @@ class Strategy:
 
         with open(filename, "r") as f:
             data = json.load(f)
-            return [
-                Strategy(candles, d["buy_weights"], d["sell_weights"], d["params"])
-                for d in data
-            ][:n]
+            return Strategy(candles, data[:-1])
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.to_json()}>"
@@ -218,24 +247,14 @@ if __name__ == "__main__":
 
     candles = get_candles()
 
-    # example params
-    params = [
-        {"window": 20},  # SMA
-        {"window": 10},  # EMA
-    ]
-    buy_weights = [-1, 1]
-    sell_weights = [1, -1]
-
-    strat1 = Strategy(candles, buy_weights, sell_weights, params)
-    print(f"Strategy 1 fitness {strat1.fitness:.2f}\n")
-
-    # random params
-    strat2 = Strategy(candles, buy_weights, sell_weights)
-    print(f"Strategy 2 fitness {strat2.fitness:.2f}\n")
+    strat = Strategy(candles)
+    print(f"Strategy fitness {strat.fitness:.2f}\n")
+    print(strat)
+    strat.evaluate(graph=True)
 
     # params from json file
-    filename = "results/best_strategies.json"
-    strat3 = Strategy.from_json(candles, filename)[0]
+    # filename = "results/best_strategies.json"
+    # strat3 = Strategy.from_json(candles, filename)[0]
 
-    print("Strategy 3")
-    strat3.evaluate(graph=True)
+    # print("Strategy 3")
+    # strat3.evaluate(graph=True)
