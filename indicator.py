@@ -7,7 +7,8 @@ import ta
 import random
 import copy
 import random
-
+# import ta.volatility for Bollinger Bands
+import ta.volatility as volatility 
 random.seed()
 
 class Indicator():
@@ -61,6 +62,14 @@ def mutate_ma(params: dict) -> dict:
   mults = [0.9, 1.1]
   return { 'window': max(1, int(params['window'] * random.choice(mults))) } # cannot drop below 1
 
+# Bollinger Bands mutation
+def mutate_bollinger(params: dict) -> dict:
+    new_params = {
+        'window': max(1, int(params['window'] + random.gauss(0, params['window'] * 0.05))),  # Gaussian mutation for window
+        'window_dev': max(1, params['window_dev'] + random.gauss(0, params['window_dev'] * 0.05))  # Gaussian mutation for window_dev
+    }
+    return new_params
+
 # ----- Indicator-specific random params functions -----
 
 def random_ma_params() -> dict:
@@ -70,12 +79,22 @@ def random_ma_params() -> dict:
 
   return { 'window': random.randrange(1, 100) }
 
+# Bollinger Bands random params
+def random_bollinger_params() -> dict:
+    '''
+    Return random, sensible params for bollinger bands indicator.
+    '''
+    return {'window': random.randrange(1, 721), 'window_dev': round(random.uniform(1, 5.1), 1)}
+
+
+
 # ------------------------------------------------------
 
 INDICATORS = [
   Indicator('SMA', ta.trend.sma_indicator, ['close'], mutate_ma, random_ma_params),
   Indicator('EMA', ta.trend.ema_indicator, ['close'], mutate_ma, random_ma_params),
-
+  # Add Bollinger Bands High and Low indicators
+  Indicator('Bollinger Bands', ta.volatility.BollingerBands, ['close'], mutate_ma, random_bollinger_params)
   # Indicator('ADX', ta.trend.adx, ['high', 'low', 'close'], )
 ]
 
