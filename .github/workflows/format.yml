@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: autopep8
-        run: pip install autopep8 && find /path/to/your/directory -name "*.py" -exec autopep8 --in-place --aggressive --aggressive --indent-size 2 {} \;
+        run: pip install autopep8 && find . -name "*.py" -exec autopep8 --in-place --aggressive --aggressive --indent-size 2 {} \;
 
       - name: Check for modified files
         id: git-check
