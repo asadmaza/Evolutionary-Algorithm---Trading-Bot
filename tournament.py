@@ -2,14 +2,17 @@
 Run a tournament to find the best Strategy through evolution.
 """
 
+from candle import get_candles_split
+from globals import timer_decorator
 from strategy import Strategy
-import pandas as pd
-import json
 from operators import crossover, selection, mutation
+from fitness import Fitness
+
+import pandas as pd
 
 import os
 import sys
-
+import json
 
 script_path = os.path.abspath(sys.argv[0])
 script_dir = os.path.dirname(script_path)
@@ -57,11 +60,19 @@ class Tournament:
 
         self.strats = [Strategy(candles) for _ in range(self.size)]
 
+        self.fitness = Fitness(self.strats, batches=4)
+
+    @timer_decorator
     def play(self) -> None:
         """Complete self.num_iterations of the tournament."""
+
+        self.fitness.update_generation(self.strats)
+        for s in self.strats:
+            s.fitness = self.fitness.get_fitness(s)
         best_individuals = self.best_strategies(self.n_best_individuals)
+
         for n_iter in range(self.num_iterations):
-            print(n_iter)
+            print(f"Iteration: {n_iter}")
             new_pop = selection(self.strats, self.num_parents)
             new_pop = crossover(new_pop)
             for s in new_pop:
@@ -71,11 +82,19 @@ class Tournament:
                     * ((self.num_iterations - n_iter) / self.num_iterations),
                 )
             new_pop.extend(best_individuals)  # Elitism
-            best_individuals = self.best_strategies(self.n_best_individuals)
 
             n_migrants = self.size - len(new_pop)
             new_pop.extend([Strategy(self.candles) for _ in range(n_migrants)])
             self.strats = new_pop
+
+            self.fitness.update_generation(self.strats)
+            for s in self.strats:
+                s.fitness = self.fitness.get_fitness(s)
+
+            best_individuals = self.best_strategies(self.n_best_individuals)
+
+        self.fitness.generate_average_graph()
+        self.fitness.generate_average_graph(type="portfolio")
 
     def best_strategies(self, n: int = 1) -> list[Strategy]:
         """Return the best n strategies in the current population."""
@@ -95,18 +114,18 @@ if __name__ == "__main__":
     Testing
     """
 
-    from candle import get_candles
+    train_candles, test_candles = get_candles_split(0.8)
 
-    candles = get_candles()
-
-    t = Tournament(candles, size=100, num_parents=40, num_iterations=30)
+    t = Tournament(train_candles, size=30, num_parents=20, num_iterations=10)
     t.play()
 
     filename = "results/best_strategies.json"
 
     t.write_best(filename, 10)
-    strats = Strategy.from_json(candles, filename)
+    strat = Strategy.from_json(train_candles, filename)[0]
+    strat.evaluate(graph=True)
+    print(strat)
 
-    for s in strats:
-        print(s)
-        print(s.evaluate(graph=True))
+    strat = Strategy.from_json(test_candles, filename)[0]
+    strat.evaluate(graph=True)
+    print(strat)

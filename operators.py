@@ -103,15 +103,18 @@ def selection(population: list["Strategy"], n_selections) -> list["Strategy"]:
     """
     Roulette wheel selection, select n_selections individuals from population.
     """
-    total_fitness = sum([s.fitness for s in population])
+    all_fitness = np.array([s.fitness for s in population])
+    all_fitness = all_fitness - np.min(all_fitness)  # Make all fitness positive
+    total_fitness = np.sum(all_fitness)
 
     # Probability of selection is proportional to fitness
-    probs = [s.fitness / total_fitness for s in population]
+    probs = all_fitness / total_fitness
 
     return np.random.choice(population, size=n_selections, p=probs)
 
 
 def gen_random_chromosome(n_window: int, n_constant: int, n_window_dev: int):
+    """Generate random chromosome using settings from globals.py"""
     return {
         "window_sizes": np.random.randint(1, WIN_MAX, size=n_window),
         "window_devs": np.round(

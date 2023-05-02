@@ -1,0 +1,27 @@
+name: auto-format
+
+on: push
+permissions:
+  actions: write
+  checks: write
+  contents: write
+
+jobs:
+  format:
+    name: Format Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: autopep8
+        run: pip install autopep8 && find . -name "*.py" -exec autopep8 --in-place --aggressive --aggressive --indent-size 2 {} \;
+
+      - name: Check for modified files
+        id: git-check
+        run: echo "modified=$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)" >> $GITHUB_OUTPUT
+
+      - name: Push changes
+        if: steps.git-check.outputs.modified == 'true'
+        run: git config --global user.name ${{ github.actor }} &&  git config --global user.email ${{ github.actor }}@users.noreply.github.com && git add . && git commit -m "Automated changes" && git push

@@ -13,6 +13,7 @@ import numpy as np
 import json
 from ta.trend import sma_indicator, ema_indicator
 from ta.volatility import bollinger_lband, bollinger_hband
+import uuid
 
 from globals import *
 
@@ -38,6 +39,9 @@ class Strategy:
 
         self.base, self.quote = market.split("/")  # currencies
 
+        self.id = uuid.uuid4()
+        self.close_prices = []
+
         # Chromosome = 5 window sizes + 2 window deviations + 6 constants
         self.n_indicators = 5
         self.chromosome = chromosome or Strategy.gen_random_chromosome(
@@ -45,7 +49,8 @@ class Strategy:
         )
         self.set_indicators(self.chromosome)
 
-        self.fitness = self.evaluate()  # evaluate fitness once on init
+        self.portfolio = self.evaluate()  # evaluate fitness once on init
+        self.fitness = None
 
     def set_indicators(self, chromosome: dict[str, int | float]):
         """Given a chromosome, set all indicators."""
@@ -126,13 +131,16 @@ class Strategy:
                     ],
                 )
 
-        quote = 100
-        base = 0
+        quote = 100  # AUD
+        base = 0  # BTC
         bought, sold = 0, 0
+        self.close_prices = [quote]
 
         for t in range(1, len(self.close)):
             if bought == sold and self.buy_trigger(t):
-                base += (quote * 0.98) / self.close[t]
+                base = (quote * 0.98) / self.close[t]
+                self.close_prices.append(quote)
+
                 if graph:
                     print(
                         f"Bought {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}"
@@ -148,7 +156,10 @@ class Strategy:
                 bought += 1
 
             elif bought > sold and self.sell_trigger(t):  # must buy before selling
-                quote += (base * 0.98) * self.close[t]
+                # NOTE: 2% is applied TO the bitcoin!
+                quote = (base * 0.98) * self.close[t]
+                self.close_prices.append(quote)
+
                 if graph:
                     print(
                         f"Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}"
@@ -157,15 +168,20 @@ class Strategy:
                         (t),
                         (self.close[t]),
                         "o",
-                        color="green",
+                        color="chartreuse",
                         label="Sell" if not sold else "",
                     )
                 base = 0
                 sold += 1
+                # What is the point of this else statement?
+            else:
+                temp = quote + base * self.close[t]
+                self.close_prices.append(temp)
 
         # if haven't sold, sell in last time period
         if base:
-            quote += base * self.close.iloc[-1]
+            quote = (base * 0.98) * self.close.iloc[-1]
+            self.close_prices.append(quote)
             if graph:
                 print(
                     f"Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close.iloc[-1]:.2f}"
@@ -174,7 +190,7 @@ class Strategy:
                     (len(self.close) - 1),
                     (self.close.iloc[-1]),
                     "o",
-                    color="green",
+                    color="chartreuse",
                     label="Sell" if not sold else "",
                 )
 
@@ -182,6 +198,7 @@ class Strategy:
             plt.legend()
             plt.show(block=True)
 
+        self.portfolio = quote
         return quote
 
     def to_json(self) -> dict:
@@ -194,6 +211,7 @@ class Strategy:
             "window_devs": self.chromosome["window_devs"].tolist(),
             "constants": self.chromosome["constants"].tolist(),
             "fitness": self.fitness,
+            "portfolio": self.portfolio,
         }
 
     @classmethod
