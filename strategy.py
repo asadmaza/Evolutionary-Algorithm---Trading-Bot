@@ -199,11 +199,19 @@ class Strategy:
 
         with open(filename, "r") as f:
             data = json.load(f)
-            return Strategy(candles, data[:-1])
+            strategies = []
+            for i in range(len(data)):
+                data[i]["window_sizes"] = np.array(data[i]["window_sizes"])
+                data[i]["window_devs"] = np.array(data[i]["window_devs"])
+                data[i]["constants"] = np.array(data[i]["constants"])
+                strategies.append(Strategy(candles, data[i]))
+
+            return strategies
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.to_json()}>"
 
+    @staticmethod
     def gen_random_chromosome(n_window: int, n_constant: int, n_window_dev: int):
         return {
             "window_sizes": np.random.randint(1, WIN_MAX, size=n_window),
@@ -229,6 +237,7 @@ if __name__ == "__main__":
     # Randomly generate strategies and write the best to a file
     while True:
         strat = Strategy(candles)
+        strat.evaluate(graph=True)
         print(f"Strategy fitness {strat.fitness:.2f}\n")
 
         if strat.fitness > best_fitness:

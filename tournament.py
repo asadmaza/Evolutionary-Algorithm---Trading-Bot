@@ -4,11 +4,15 @@ Run a tournament to find the best Strategy through evolution.
 
 from strategy import Strategy
 import pandas as pd
-import random
 import json
 from operators import crossover, selection, mutation
 
-random.seed()
+import os
+import sys
+
+script_path = os.path.abspath(sys.argv[0])
+script_dir = os.path.dirname(script_path)
+os.chdir(script_dir)
 
 
 class Tournament:
@@ -18,7 +22,7 @@ class Tournament:
         size: int,
         num_parents: int,
         num_iterations: int,
-        mutation_probability: float = 0.09,
+        mutation_probability: float = 0.5,
         n_best_individuals: int = 3,
     ) -> None:
         """
@@ -55,12 +59,16 @@ class Tournament:
     def play(self) -> None:
         """Complete self.num_iterations of the tournament."""
         best_individuals = self.best_strategies(self.n_best_individuals)
-
-        for _ in range(self.num_iterations):
+        for n_iter in range(self.num_iterations):
+            print(n_iter)
             new_pop = selection(self.strats, self.num_parents)
             new_pop = crossover(new_pop)
             for s in new_pop:
-                mutation(s, self.mutation_probability)
+                mutation(
+                    s,
+                    self.mutation_probability
+                    * ((self.num_iterations - n_iter) / self.num_iterations),
+                )
             new_pop.extend(best_individuals)  # Elitism
             best_individuals = self.best_strategies(self.n_best_individuals)
 
@@ -70,7 +78,7 @@ class Tournament:
 
     def best_strategies(self, n: int = 1) -> list[Strategy]:
         """Return the best n strategies in the current population."""
-        return sorted(self.strats, key=lambda s: s.evaluate(), reverse=True)[:n]
+        return sorted(self.strats, key=lambda s: s.fitness, reverse=True)[:n]
 
     def write_best(self, filename: str, n: int = 1) -> None:
         """

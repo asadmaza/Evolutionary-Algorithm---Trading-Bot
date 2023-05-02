@@ -22,16 +22,17 @@ def mutation(
     """
     # Go through each param list, and mutate each value with probability `prob`
     for name in strategy.chromosome.keys():
-        gene = strategy.chromosome[name]
+        # Convert to float to allow adding Gaussian noise
+        gene = strategy.chromosome[name].astype(np.float64)
 
         # Elements that should be mutated
         mutation_mask = np.random.random(size=len(gene)) < prob
 
         mean, sigma = __match_gaussian_params(name)
-        changes = [random.gauss(mean, sigma) for _ in range(len(gene))]
+        changes = np.array([random.gauss(mean, sigma) for _ in range(len(gene))])
         gene[mutation_mask] += changes[mutation_mask]
 
-        gene = __round_and_clip(gene, name)
+        strategy.chromosome[name] = __round_and_clip(gene, name)
 
     # Apply the new chromosome to the strategy
     strategy.set_indicators(strategy.chromosome)
