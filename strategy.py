@@ -7,25 +7,21 @@ Ideas:
 - Could have separate indicators with separate params for buy and sell triggers.
 """
 
-from indicator import mutate
 import pandas as pd
 from matplotlib import pyplot as plt
-import random
+import numpy as np
 import json
 from ta.trend import sma_indicator, ema_indicator
 from ta.volatility import bollinger_lband, bollinger_hband
 
+from globals import *
+
 
 class Strategy:
-    WIN_MAX = 50  # Max window size for indicators when initialising
-    WIN_DEV_MAX = 10  # Max window deviation for indicators when initialising
-    CONST_MAX = 5  # Max constant for indicators when initialising
-    DECIMAL_PLACE = 3  # Decimal place to round for float params
-
     def __init__(
         self,
         candles: pd.DataFrame,
-        chromosome: dict[str, int | float] | None = None,
+        chromosome: dict[str, np.ndarray[int | float]] | None = None,
         market="BTC/AUD",
     ) -> None:
         """
@@ -44,19 +40,9 @@ class Strategy:
 
         # Chromosome = 5 window sizes + 2 window deviations + 6 constants
         self.n_indicators = 5
-        self.chromosome = chromosome or {
-            "window_sizes": [
-                random.randint(1, self.WIN_MAX) for _ in range(self.n_indicators)
-            ],
-            "window_devs": [
-                round(random.uniform(1, self.WIN_DEV_MAX), self.DECIMAL_PLACE)
-                for _ in range(2)
-            ],
-            "constants": [
-                round(random.uniform(0, self.CONST_MAX), self.DECIMAL_PLACE)
-                for _ in range(6)
-            ],
-        }
+        self.chromosome = chromosome or Strategy.gen_random_chromosome(
+            self.n_indicators, 6, 2
+        )
         self.set_indicators(self.chromosome)
 
         self.fitness = self.evaluate()  # evaluate fitness once on init
@@ -191,35 +177,15 @@ class Strategy:
 
         return quote
 
-    def mutate(self, prob=0.09) -> "Strategy":
-        """
-        Return a new Strategy with randomly mutated weights and params.
-        """
-        for name in self.chromosome.keys():
-            if random.uniform(0, 1) < prob:
-                match name:
-                    case "window":
-                        low = 1
-                        high = self.WIN_MAX
-                    case "window_dev":
-                        low = 1
-                        high = self.WIN_DEV_MAX
-                    case "constant":
-                        low = 0
-                        high = self.CONST_MAX
-                self.chromosome[name] = mutate(self.chromosome[name], name, low, high)
-        self.set_indicators(self.chromosome)
-        self.fitness = self.evaluate()
-
     def to_json(self) -> dict:
         """
         Return a dict of the minimum data needed to represent this strategy, as well as the fitness.
         """
 
         return {
-            "window_sizes": self.chromosome["window_sizes"],
-            "window_devs": self.chromosome["window_devs"],
-            "constants": self.chromosome["constants"],
+            "window_sizes": self.chromosome["window_sizes"].tolist(),
+            "window_devs": self.chromosome["window_devs"].tolist(),
+            "constants": self.chromosome["constants"].tolist(),
             "fitness": self.fitness,
         }
 
@@ -237,6 +203,17 @@ class Strategy:
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.to_json()}>"
+
+    def gen_random_chromosome(n_window: int, n_constant: int, n_window_dev: int):
+        return {
+            "window_sizes": np.random.randint(1, WIN_MAX, size=n_window),
+            "window_devs": np.round(
+                np.random.uniform(1, WIN_DEV_MAX, size=n_window_dev), DECIMAL_PLACE
+            ),
+            "constants": np.round(
+                np.random.uniform(0, CONST_MAX, size=n_constant), DECIMAL_PLACE
+            ),
+        }
 
 
 if __name__ == "__main__":

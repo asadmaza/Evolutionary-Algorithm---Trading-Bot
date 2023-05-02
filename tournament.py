@@ -2,19 +2,24 @@
 Run a tournament to find the best Strategy through evolution.
 """
 
-import copy
 from strategy import Strategy
 import pandas as pd
 import random
 import json
-import numpy as np
+from operators import crossover, selection, mutation
 
 random.seed()
 
 
 class Tournament:
     def __init__(
-        self, candles: pd.DataFrame, size: int, num_parents: int, num_iterations: int
+        self,
+        candles: pd.DataFrame,
+        size: int,
+        num_parents: int,
+        num_iterations: int,
+        mutation_probability: float = 0.09,
+        n_best_individuals: int = 3,
     ) -> None:
         """
         Parameters
@@ -24,76 +29,48 @@ class Tournament:
           Size of the population that stays fixed throughout tournament.
 
         num_parents : int
-          The number of strategies that mutate to create children.
-          Also the number of strategies to be discarded each iteration.
+          Number of parents to select from the population at each iteration.
+          Also the size of population (i.e. children) in next iteration.
+          If num_parents < size, migration is used to fill the population.
 
-        num_iterations : int
-          Number of iterations per tournament.
+        mutation_probability: float
+          Probability the chromosome of each child will be mutated.
+
+        n_best_individuals: int
+            Elitism - number of top performing individuals to keep in next iteration.
         """
+
+        if num_parents > size:
+            raise ValueError("num_parents must be <= size")
 
         self.size = size
-        self.num_parents = num_parents  # must be less than half the size
+        self.num_parents = num_parents
         self.num_iterations = num_iterations
+        self.mutation_probability = mutation_probability
+        self.n_best_individuals = n_best_individuals
+        self.candles = candles
 
-        self.strats = []
-
-        buy_weights, sell_weights = [-1, 1], [1, -1]
-        for _ in range(self.size // 2):  # assume size is even
-            self.strats.append(Strategy(candles))
-            self.strats.append(
-                Strategy(candles, buy_weights, sell_weights)
-            )  # seed half the population with 'good' weights
+        self.strats = [Strategy(candles) for _ in range(self.size)]
 
     def play(self) -> None:
-        """
-        Complete self.num_iterations of the tournament.
-
-         - evaluate each strategy,
-         - mutate the best (self.num_parents) strategies and add to the pool, and
-         - 'kill off' the worst (self.num_parents) strategies.
-        """
+        """Complete self.num_iterations of the tournament."""
+        best_individuals = self.best_strategies(self.n_best_individuals)
 
         for _ in range(self.num_iterations):
-            new_pop = self.selection(n_selections=self.num_parents)
-            new_pop = self.crossover(new_pop)
-            new_pop = self.mutation(new_pop)
-            self.strats.extend(
-                [s.mutate() for s in self.strats[: self.num_parents]]
-            )  # add mutations of the best
+            new_pop = selection(self.strats, self.num_parents)
+            new_pop = crossover(new_pop)
+            for s in new_pop:
+                mutation(s, self.mutation_probability)
+            new_pop.extend(best_individuals)  # Elitism
+            best_individuals = self.best_strategies(self.n_best_individuals)
 
-            # could also add more random strategies back into the population at each iteration
+            n_migrants = self.size - len(new_pop)
+            new_pop.extend([Strategy(self.candles) for _ in range(n_migrants)])
+            self.strats = new_pop
 
     def best_strategies(self, n: int = 1) -> list[Strategy]:
-        """
-        Return the best n strategies in the current population.
-        """
-
+        """Return the best n strategies in the current population."""
         return sorted(self.strats, key=lambda s: s.evaluate(), reverse=True)[:n]
-
-    def selection(self, n_selections: int = 1) -> list[Strategy]:
-        """
-        Roulette wheel selection.
-        """
-        total_fitness = sum([s.fitness for s in self.strats])
-        # Probability of selection is proportional to fitness
-        probs = [s.fitness / total_fitness for s in self.strats]
-        return np.random.choice(self.strats, size=n_selections, p=probs)
-
-    def crossover(self, parents: list[Strategy]) -> list[Strategy]:
-        """
-        Given a list of parents, return same number of offspring from crossover.
-        """
-        offspring = []
-        while len(offspring) < len(parents):
-            p1, p2 = random.choices(parents, k=2)
-            params = copy.deepcopy(p1.params)
-            for key in params.keys():
-                params[key] = (params[key] + p2.params[key]) / 2
-            offspring.append(Strategy(p1.candles, params=params))
-        pass
-
-    def mutation(self, parents: list[Strategy]) -> list[Strategy]:
-        pass
 
     def write_best(self, filename: str, n: int = 1) -> None:
         """
