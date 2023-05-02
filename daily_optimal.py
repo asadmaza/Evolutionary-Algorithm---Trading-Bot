@@ -16,18 +16,8 @@ class Optimal(Strategy):
         self.close.index = self.close.index + 1
         self.close = self.close.sort_index()
 
-    def buy_trigger(self, t: int) -> bool:
-        if t + 1 >= len(self.close):
-            return False
-        return self.close[t + 1] > self.close[t]
-
-    def sell_trigger(self, t: int) -> bool:
-        if t + 1 >= len(self.close):
-            return False
-        return self.close[t + 1] < self.close[t]
-
         # Removing indicators from graph
-        indicator.NUM_INDICATORS = 0
+        self.n_indicators = 0
 
     def buy_trigger(self, t: int) -> bool:
         if t + 1 >= len(self.close):
@@ -39,13 +29,6 @@ class Optimal(Strategy):
             return False
         return self.close[t + 1] < self.close[t]
 
-
-if __name__ == "__main__":
-    """
-    Testing
-    """
-
-    from candle import get_candles
 
 if __name__ == "__main__":
     """
@@ -56,11 +39,6 @@ if __name__ == "__main__":
 
     train_candles, test_candles = get_candles_split(0.2)
 
-    o = Optimal(train_candles)
-    portfolio = o.evaluate(False)
-    f = Fitness(batches=4)
-    o.update_fitness(f.get_fitness(o))
-    print(portfolio)
     o = Optimal(train_candles)
     portfolio = o.evaluate(False)
     f = Fitness(batches=4)
