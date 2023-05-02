@@ -1,4 +1,6 @@
 # Sigma determines spread of Gaussian, used in mutation
+import time
+from functools import wraps
 WINDOW_GAUSSIAN_SIGMA = 3
 CONSTANT_GAUSSIAN_SIGMA = 0.5
 WINDOW_DEV_GAUSSIAN_SIGMA = 0.5
@@ -10,20 +12,16 @@ CONST_MAX = 5
 DECIMAL_PLACE = 5
 
 
-from functools import wraps
-import time
-
-
 def timer_decorator(func):
-    """Decorator to time function execution"""
+  """Decorator to time function execution"""
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        elapsed_time = end_time - start_time
-        print(f"Execution time of {func.__name__}: {elapsed_time} seconds")
-        return result
+  @wraps(func)
+  def wrapper(*args, **kwargs):
+    start_time = time.perf_counter()
+    result = func(*args, **kwargs)
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"Execution time of {func.__name__}: {elapsed_time} seconds")
+    return result
 
-    return wrapper
+  return wrapper
