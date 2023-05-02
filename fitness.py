@@ -2,6 +2,7 @@
 Calculate the normalised fitness of a strategy
 """
 
+from candle import get_candles
 import statistics
 from typing import Literal
 from sklearn.preprocessing import MinMaxScaler
@@ -69,7 +70,7 @@ class Fitness:
     def get_ROI_fitness_normalised(self, strat):
         try:
             return self.roi_quotes[strat.id]
-        except:
+        except BaseException:
             self.ROI()
             return self.roi_quotes[strat.id]
 
@@ -152,8 +153,6 @@ class Fitness:
 
         plt.show()
 
-
-from candle import get_candles
 
 candles = get_candles()
 
