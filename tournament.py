@@ -10,6 +10,8 @@ from operators import crossover, selection, mutation
 import os
 import sys
 
+from globals import timer_decorator
+
 script_path = os.path.abspath(sys.argv[0])
 script_dir = os.path.dirname(script_path)
 os.chdir(script_dir)
@@ -98,7 +100,7 @@ if __name__ == "__main__":
 
     candles = get_candles()
 
-    t = Tournament(candles, size=50, num_parents=20, num_iterations=10)
+    t = Tournament(candles, size=100, num_parents=40, num_iterations=50)
     t.play()
 
     filename = "results/best_strategies.json"
