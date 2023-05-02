@@ -7,7 +7,6 @@ from strategy import Strategy
 from fitness import Fitness
 
 
-
 class Optimal(Strategy):
   def __init__(self, candles) -> None:
     super().__init__(candles)
@@ -17,25 +16,26 @@ class Optimal(Strategy):
     self.close.index = self.close.index + 1
     self.close = self.close.sort_index()
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+<< << << < HEAD
+<< << << < HEAD
     def buy_trigger(self, t: int) -> bool:
         if t + 1 >= len(self.close):
             return False
         return self.close[t + 1] > self.close[t]
-=======
+== == == =
   def buy_trigger(self, t: int) -> bool:
     if t + 1 >= len(self.close):
       return False
     return self.close[t + 1] > self.close[t]
->>>>>>> d3c6011069549fa876415bdcd5f849c88c46ff16
+>>>>>> > d3c6011069549fa876415bdcd5f849c88c46ff16
 
   def sell_trigger(self, t: int) -> bool:
     if t + 1 >= len(self.close):
       return False
     return self.close[t + 1] < self.close[t]
 
-=======
+== == == =
     # Removing indicators from graph
     indicator.NUM_INDICATORS = 0
 
