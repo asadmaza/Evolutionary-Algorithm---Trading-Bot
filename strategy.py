@@ -49,18 +49,26 @@ class Strategy:
 
     def set_indicators(self, chromosome: dict[str, int | float]):
         """Given a chromosome, set all indicators."""
-        self.sma1 = sma_indicator(self.close, window=chromosome["window_sizes"][0])
-        self.sma2 = sma_indicator(self.close, window=chromosome["window_sizes"][1])
-        self.ema = ema_indicator(self.close, window=chromosome["window_sizes"][2])
+        self.sma1 = sma_indicator(
+            self.close, window=chromosome["window_sizes"][0], fillna=True
+        )
+        self.sma2 = sma_indicator(
+            self.close, window=chromosome["window_sizes"][1], fillna=True
+        )
+        self.ema = ema_indicator(
+            self.close, window=chromosome["window_sizes"][2], fillna=True
+        )
         self.bollinger_lband = bollinger_lband(
             self.close,
             window=chromosome["window_sizes"][3],
             window_dev=chromosome["window_devs"][0],
+            fillna=True,
         )
         self.bollinger_hband = bollinger_hband(
             self.close,
             window=chromosome["window_sizes"][4],
             window_dev=chromosome["window_devs"][1],
+            fillna=True,
         )
 
     def buy_trigger(self, t: int) -> bool:
@@ -69,11 +77,10 @@ class Strategy:
         """
         return (
             (self.sma1[t] > self.chromosome["constants"][0] * self.sma2[t])
-            and (self.close[t] > self.chromosome["constants"][1] * self.ema[t])
-            # TODO: is close < c bollinger_low or close > c bollinger_low?
+            or (self.close[t] > self.chromosome["constants"][1] * self.ema[t])
             or (
-                self.close[t]
-                > self.chromosome["constants"][2] * self.bollinger_lband[t]
+                self.bollinger_lband[t]
+                > self.chromosome["constants"][2] * self.close[t]
             )
         )
 
@@ -83,7 +90,7 @@ class Strategy:
         """
         return (
             (self.sma2[t] > self.chromosome["constants"][3] * self.sma1[t])
-            and (self.ema[t] > self.chromosome["constants"][4] * self.close[t])
+            or (self.ema[t] > self.chromosome["constants"][4] * self.close[t])
             or (
                 self.close[t]
                 > self.chromosome["constants"][5] * self.bollinger_hband[t]
@@ -141,7 +148,7 @@ class Strategy:
                 bought += 1
 
             elif bought > sold and self.sell_trigger(t):  # must buy before selling
-                quote += (base * self.close[t]) * 0.98
+                quote += (base * 0.98) * self.close[t]
                 if graph:
                     print(
                         f"Sold   {base:.2E} {self.base} for {quote:.2f} {self.quote} at time {t:3d}, price {self.close[t]:.2f}"
@@ -237,11 +244,6 @@ if __name__ == "__main__":
     # Randomly generate strategies and write the best to a file
     while True:
         strat = Strategy(candles)
-        strat.evaluate(graph=True)
         print(f"Strategy fitness {strat.fitness:.2f}\n")
-
-        if strat.fitness > best_fitness:
-            filename = "results/best_strategies.json"
-            with open(filename, "w") as f:
-                json.dump(strat.to_json(), f, indent=2)
-            best_fitness = strat.fitness
+        print(strat)
+        strat.evaluate(graph=True)

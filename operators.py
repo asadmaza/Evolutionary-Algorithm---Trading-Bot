@@ -28,8 +28,8 @@ def mutation(
         # Elements that should be mutated
         mutation_mask = np.random.random(size=len(gene)) < prob
 
-        mean, sigma = __match_gaussian_params(name)
-        changes = np.array([random.gauss(mean, sigma) for _ in range(len(gene))])
+        sigma = __match_gaussian_sigma(name)
+        changes = np.array([random.gauss(0, sigma) for _ in range(len(gene))])
         gene[mutation_mask] += changes[mutation_mask]
 
         strategy.chromosome[name] = __round_and_clip(gene, name)
@@ -59,21 +59,18 @@ def __match_range_bounds(name: str):
     return low, high, decimal_place
 
 
-def __match_gaussian_params(name: str):
-    """Helper function for mutation, match name to Gaussian parameters"""
+def __match_gaussian_sigma(name: str):
+    """Helper function for mutation, match name to Gaussian sigma"""
     match name:
         case "window_sizes":
-            mean = WINDOW_GAUSSIAN_MEAN
             sigma = WINDOW_GAUSSIAN_SIGMA
         case "constants":
-            mean = CONSTANT_GAUSSIAN_MEAN
             sigma = CONSTANT_GAUSSIAN_SIGMA
         case "window_devs":
-            mean = WINDOW_DEV_GAUSSIAN_MEAN
             sigma = WINDOW_DEV_GAUSSIAN_SIGMA
         case _:
             raise ValueError(f"Unknown parameter name: {name}")
-    return mean, sigma
+    return sigma
 
 
 def __round_and_clip(lst: np.ndarray, name: str):
