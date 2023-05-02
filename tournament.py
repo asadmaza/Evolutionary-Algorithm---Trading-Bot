@@ -10,7 +10,6 @@ from operators import crossover, selection, mutation
 import os
 import sys
 
-from globals import timer_decorator
 
 script_path = os.path.abspath(sys.argv[0])
 script_dir = os.path.dirname(script_path)
@@ -105,7 +104,7 @@ if __name__ == "__main__":
 
     filename = "results/best_strategies.json"
 
-    t.write_best(filename, t.size)
+    t.write_best(filename, 10)
     strat = Strategy.from_json(candles, filename)[0]
 
     print(strat)
