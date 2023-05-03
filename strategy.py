@@ -7,6 +7,7 @@ Ideas:
 - Could have separate indicators with separate params for buy and sell triggers.
 """
 
+from typing import Callable, Any
 import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np
@@ -16,13 +17,13 @@ from ta.volatility import bollinger_lband, bollinger_hband
 import uuid
 
 from globals import *
-
+from dnf import ChromosomeHandler
 
 class Strategy:
     def __init__(
         self,
         candles: pd.DataFrame,
-        chromosome: dict[str, np.ndarray[int | float]] | None = None,
+        chromosome: dict[str, Any] | None = None,
         market="BTC/AUD",
     ) -> None:
         """
@@ -44,50 +45,16 @@ class Strategy:
 
         # Chromosome = 5 window sizes + 2 window deviations + 6 constants
         self.n_indicators = 5
-        self.chromosome = chromosome or Strategy.gen_random_chromosome(
-            self.n_indicators, 6, 2
-        )
-        self.set_indicators(self.chromosome)
+        self.chromosome = chromosome
+        self.set_chromosome(self.chromosome)
 
         self.portfolio = self.evaluate()  # evaluate fitness once on init
         self.fitness = None
 
-    def set_indicators(self, chromosome: dict[str, int | float]):
+    def set_chromosome(self, chromosome: dict[str, int | float]):
         """Given a chromosome, set all indicators."""
-        self.sma1 = sma_indicator(
-            self.close, window=chromosome["window_sizes"][0], fillna=True
-        )
-        self.sma2 = sma_indicator(
-            self.close, window=chromosome["window_sizes"][1], fillna=True
-        )
-        self.ema = ema_indicator(
-            self.close, window=chromosome["window_sizes"][2], fillna=True
-        )
-        self.bollinger_lband = bollinger_lband(
-            self.close,
-            window=chromosome["window_sizes"][3],
-            window_dev=chromosome["window_devs"][0],
-            fillna=True,
-        )
-        self.bollinger_hband = bollinger_hband(
-            self.close,
-            window=chromosome["window_sizes"][4],
-            window_dev=chromosome["window_devs"][1],
-            fillna=True,
-        )
-
-    def buy_trigger(self, t: int) -> bool:
-        """
-        Return True if should buy at time period t, else False.
-        """
-        return (
-            (self.sma1[t] > self.chromosome["constants"][0] * self.sma2[t])
-            or (self.close[t] > self.chromosome["constants"][1] * self.ema[t])
-            or (
-                self.bollinger_lband[t]
-                > self.chromosome["constants"][2] * self.close[t]
-            )
-        )
+        self.buy_trigger = chromosome["function"]
+        
 
     def sell_trigger(self, t: int) -> bool:
         """
@@ -257,6 +224,10 @@ if __name__ == "__main__":
     from candle import get_candles
 
     candles = get_candles()
+
+    c1 = ChromosomeHandler.generate_chromosome()
+    c2 = ChromosomeHandler.generate_chromosome()
+    s = Strategy(candles, c1)
 
     best_fitness = 0
     # Randomly generate strategies and write the best to a file
