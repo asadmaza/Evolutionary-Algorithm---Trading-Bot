@@ -11,7 +11,7 @@ FLOAT_GAUSSIAN_SIGMA = 0.5
 # Offset from default int or float value, range is +/- this value
 INT_OFFSET = 30
 FLOAT_OFFSET = 5
-FLOAT_DECIMAL = 5
+DECIMAL_PLACES = 3
 CONST_MAX = 5
 
 

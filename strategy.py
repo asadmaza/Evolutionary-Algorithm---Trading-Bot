@@ -239,12 +239,12 @@ class Strategy:
   @staticmethod
   def gen_random_chromosome(n_window: int, n_constant: int, n_window_dev: int):
     return {
-        "window_sizes": np.random.randint(1, WIN_MAX, size=n_window),
+        "window_sizes": np.random.randint(1, INT_OFFSET, size=n_window),
         "window_devs": np.round(
-            np.random.uniform(1, WIN_DEV_MAX, size=n_window_dev), DECIMAL_PLACE
+            np.random.uniform(1, FLOAT_OFFSET, size=n_window_dev), DECIMAL_PLACES
         ),
         "constants": np.round(
-            np.random.uniform(0, CONST_MAX, size=n_constant), DECIMAL_PLACE
+            np.random.uniform(0, CONST_MAX, size=n_constant), DECIMAL_PLACES
         ),
     }
 
