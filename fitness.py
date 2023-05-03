@@ -1,6 +1,6 @@
-'''
+"""
 Calculate the normalised fitness of a strategy
-'''
+"""
 
 from candle import get_candles
 import statistics
@@ -13,7 +13,7 @@ import copy
 import math
 
 
-class Fitness():
+class Fitness:
   def __init__(self, strats=[], batches=1) -> None:
     self.strats = copy.deepcopy(strats)
     self.generation = 0
@@ -82,8 +82,9 @@ class Fitness():
     self.rf = 0.012 / 365
 
     for i in range(1, len(strat.close_prices)):
-      daily_return = (
-          strat.close_prices[i] - strat.close_prices[i - 1]) / (strat.close_prices[i - 1])
+      daily_return = (strat.close_prices[i] - strat.close_prices[i - 1]) / (
+          strat.close_prices[i - 1]
+      )
       daily_returns.append(daily_return)
 
     avg_daily_return = sum(daily_returns) / len(daily_returns)
@@ -103,8 +104,9 @@ class Fitness():
     target_return = 0
 
     for i in range(1, len(strat.close_prices)):
-      daily_return = (
-          strat.close_prices[i] - strat.close_prices[i - 1]) / (strat.close_prices[i - 1])
+      daily_return = (strat.close_prices[i] - strat.close_prices[i - 1]) / (
+          strat.close_prices[i - 1]
+      )
       daily_returns.append(daily_return)
 
     avg_daily_return = sum(daily_returns) / len(daily_returns)
@@ -124,9 +126,10 @@ class Fitness():
     return sortino_ratio
 
   def generate_generation_graph(
-          self, generation=-1, type: Literal['fitness', 'porfolio'] = "fitness"):
+      self, generation=-1, type: Literal["fitness", "porfolio"] = "fitness"
+  ):
     data = self.fitness
-    if type == 'portfolio':
+    if type == "portfolio":
       data = self.portfolio
 
     if generation == -1:
@@ -136,9 +139,9 @@ class Fitness():
     plt.show()
 
   def generate_average_graph(
-          self, type: Literal['fitness', 'porfolio'] = "fitness"):
+          self, type: Literal["fitness", "porfolio"] = "fitness"):
     data = self.fitness
-    if type == 'portfolio':
+    if type == "portfolio":
       data = self.portfolio
 
     averages = []
@@ -154,9 +157,9 @@ class Fitness():
 
 candles = get_candles()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   # params from json file
-  filename = 'results/best_strategies.json'
+  filename = "results/best_strategies.json"
   s = Strategy.from_json(candles, filename)[0]
 
   # s.evaluate(graph=True)

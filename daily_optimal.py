@@ -1,11 +1,10 @@
-'''
+"""
 An optimal bot that trades at the perfect times and is able to gain the maximum profit
-'''
+"""
 
 from candle import get_candles_split
 from strategy import Strategy
 from fitness import Fitness
-import indicator
 
 
 class Optimal(Strategy):
@@ -18,23 +17,23 @@ class Optimal(Strategy):
     self.close = self.close.sort_index()
 
     # Removing indicators from graph
-    indicator.NUM_INDICATORS = 0
+    self.n_indicators = 0
 
   def buy_trigger(self, t: int) -> bool:
-    if (t + 1 >= len(self.close)):
+    if t + 1 >= len(self.close):
       return False
     return self.close[t + 1] > self.close[t]
 
   def sell_trigger(self, t: int) -> bool:
-    if (t + 1 >= len(self.close)):
+    if t + 1 >= len(self.close):
       return False
     return self.close[t + 1] < self.close[t]
 
 
-if __name__ == '__main__':
-  '''
+if __name__ == "__main__":
+  """
   Testing
-  '''
+  """
 
   from candle import get_candles
 
