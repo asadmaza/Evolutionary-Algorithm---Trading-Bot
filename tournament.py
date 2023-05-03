@@ -60,7 +60,7 @@ class Tournament:
 
     self.strats = [Strategy(candles) for _ in range(self.size)]
 
-    self.fitness = Fitness(self.strats, batches=4)
+    self.fitness = Fitness(self.strats, batches=1)
 
   @timer_decorator
   def play(self) -> None:
@@ -95,6 +95,7 @@ class Tournament:
 
     self.fitness.generate_average_graph()
     self.fitness.generate_average_graph(type="portfolio")
+    self.fitness.generate_generation_graph()
 
   def best_strategies(self, n: int = 1) -> list[Strategy]:
     """Return the best n strategies in the current population."""
@@ -108,7 +109,6 @@ class Tournament:
     with open(filename, "w") as f:
       json.dump([s.to_json() for s in self.best_strategies(n)], f, indent=2)
 
-
 if __name__ == "__main__":
   """
   Testing
@@ -116,16 +116,16 @@ if __name__ == "__main__":
 
   train_candles, test_candles = get_candles_split(0.8)
 
-  t = Tournament(train_candles, size=30, num_parents=20, num_iterations=10)
+  t = Tournament(train_candles, size=200, num_parents=20, num_iterations=20)
   t.play()
 
   filename = "results/best_strategies.json"
 
   t.write_best(filename, 10)
   strat = Strategy.from_json(train_candles, filename)[0]
-  strat.evaluate(graph=True)
+  strat.evaluate(graph=False)
   print(strat)
 
   strat = Strategy.from_json(test_candles, filename)[0]
-  strat.evaluate(graph=True)
+  strat.evaluate(graph=False)
   print(strat)

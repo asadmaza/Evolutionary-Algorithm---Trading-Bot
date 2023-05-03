@@ -23,6 +23,7 @@ class Strategy:
       self,
       candles: pd.DataFrame,
       chromosome: dict[str, np.ndarray[int | float]] | None = None,
+      fitness: int = None,
       market="BTC/AUD",
   ) -> None:
     """
@@ -49,8 +50,8 @@ class Strategy:
     )
     self.set_indicators(self.chromosome)
 
-    self.portfolio = self.evaluate()  # evaluate fitness once on init
-    self.fitness = None
+    self.portfolio = self.evaluate()  # evaluate portfolio once on init
+    self.fitness = fitness
 
   def set_indicators(self, chromosome: dict[str, int | float]):
     """Given a chromosome, set all indicators."""
@@ -226,14 +227,30 @@ class Strategy:
       data = json.load(f)
       strategies = []
       for i in range(len(data)):
+        print(data[i]['fitness'])
         data[i]["window_sizes"] = np.array(data[i]["window_sizes"])
         data[i]["window_devs"] = np.array(data[i]["window_devs"])
         data[i]["constants"] = np.array(data[i]["constants"])
-        strategies.append(Strategy(candles, data[i]))
+        strategies.append(Strategy(candles, data[i], data[i]['fitness']))
 
       return strategies
 
-  def __repr__(self) -> str:
+  def __repr__(self, format=True) -> str:
+    if format:
+      window_sizes = [round(size, 3) for size in self.chromosome['window_sizes']]
+      window_devs = [round(dev, 3) for dev in self.chromosome['window_devs']]
+      constants = [round(c, 3) for c in self.chromosome['constants']]
+      portfolio = round(self.portfolio, 2)
+      fitness = round(self.fitness, 3)
+      
+      return(f"\n--- Strategy ---\n"
+            f"Window sizes: {window_sizes}\n"
+            f"Window deviations: {window_devs}\n"
+            f"Constants: {constants}\n"
+            f"Portfolio: {portfolio}\n"
+            f"Fitness: {fitness}\n"
+            f"----------------\n")
+
     return f"<{self.__class__.__name__} {self.to_json()}>"
 
   @staticmethod
