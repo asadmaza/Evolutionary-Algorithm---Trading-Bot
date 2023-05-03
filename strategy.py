@@ -237,19 +237,20 @@ class Strategy:
 
   def __repr__(self, format=True) -> str:
     if format:
-      window_sizes = [round(size, 3) for size in self.chromosome['window_sizes']]
+      window_sizes = [round(size, 3)
+                      for size in self.chromosome['window_sizes']]
       window_devs = [round(dev, 3) for dev in self.chromosome['window_devs']]
       constants = [round(c, 3) for c in self.chromosome['constants']]
       portfolio = round(self.portfolio, 2)
       fitness = round(self.fitness, 3)
-      
-      return(f"\n--- Strategy ---\n"
-            f"Window sizes: {window_sizes}\n"
-            f"Window deviations: {window_devs}\n"
-            f"Constants: {constants}\n"
-            f"Portfolio: {portfolio}\n"
-            f"Fitness: {fitness}\n"
-            f"----------------\n")
+
+      return (f"\n--- Strategy ---\n"
+              f"Window sizes: {window_sizes}\n"
+              f"Window deviations: {window_devs}\n"
+              f"Constants: {constants}\n"
+              f"Portfolio: {portfolio}\n"
+              f"Fitness: {fitness}\n"
+              f"----------------\n")
 
     return f"<{self.__class__.__name__} {self.to_json()}>"
 

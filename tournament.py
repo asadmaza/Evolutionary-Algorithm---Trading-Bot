@@ -109,6 +109,7 @@ class Tournament:
     with open(filename, "w") as f:
       json.dump([s.to_json() for s in self.best_strategies(n)], f, indent=2)
 
+
 if __name__ == "__main__":
   """
   Testing
