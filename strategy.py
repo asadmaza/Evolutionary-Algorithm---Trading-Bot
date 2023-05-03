@@ -19,6 +19,7 @@ import uuid
 from globals import *
 from dnf import ChromosomeHandler
 
+
 class Strategy:
     def __init__(
         self,
@@ -44,7 +45,6 @@ class Strategy:
         self.close_prices = []
 
         # Chromosome = 5 window sizes + 2 window deviations + 6 constants
-        self.n_indicators = 5
         self.chromosome = chromosome
         self.set_chromosome(self.chromosome)
 
@@ -54,7 +54,13 @@ class Strategy:
     def set_chromosome(self, chromosome: dict[str, int | float]):
         """Given a chromosome, set all indicators."""
         self.buy_trigger = chromosome["function"]
-        
+        self.n_indicators = len(chromosome["indicators"])
+        self.indicators = []
+        # For each indicator, provide respective params and generate DataFrame features
+        for i in range(self.n_indicators):
+            self.indicators.append(
+                chromosome["indicators"][i][1](**chromosome["params"][i])
+            )
 
     def sell_trigger(self, t: int) -> bool:
         """
@@ -225,8 +231,8 @@ if __name__ == "__main__":
 
     candles = get_candles()
 
-    c1 = ChromosomeHandler.generate_chromosome()
-    c2 = ChromosomeHandler.generate_chromosome()
+    handler = ChromosomeHandler(candles)
+    c1 = handler.generate_chromosome()
     s = Strategy(candles, c1)
 
     best_fitness = 0

@@ -11,17 +11,16 @@ import pandas as pd
 
 import warnings
 import random
-import re     # regex my beloved <3
+import re  # regex my beloved <3
 
 from globals import *
-
 
 
 class ChromosomeHandler:
     """Handles chromosome and DNF expression generation
 
     Candle value DataFrame is required as it's used as input to indicators.
-    
+
     Chromosome is defined as a dictionary, with keys:
         - "indicators": list in the form [("name", <function object>), ...]
         - "params": list of dictionary storing kargs for each indicator
@@ -40,7 +39,7 @@ class ChromosomeHandler:
     __VAL3 = "C"
 
     # Change below to match signature in Strategy class
-    __VAL1_NAME = "self.chromosome['indicators']"
+    __VAL1_NAME = "self.indicators"
     __VAL2_NAME = "self.chromosome['candle_names']"
     __VAL3_NAME = "self.chromosome['constants']"
 
@@ -49,13 +48,28 @@ class ChromosomeHandler:
     CONJ_PROBABILITY = 0.2
     N_CONJ_MAX = 3
 
-    CHROMOSOME_FORMAT = {"indicators": [], "params": [], "candle_names": [], "constants": []}
+    CHROMOSOME_FORMAT = {
+        "indicators": [],
+        "params": [],
+        "candle_names": [],
+        "constants": [],
+    }
 
-    def __init__(self, candles: pd.DataFrame, modules: list[types.ModuleType]):
+    def __init__(
+        self,
+        candles: pd.DataFrame,
+        modules: list[types.ModuleType] = [
+            ta.momentum,
+            ta.volatility,
+            ta.trend,
+            ta.volume,
+            ta.others,
+        ],
+    ):
         """Discover indicators in modules and bind self to specific candle values."""
-        self.candles = candles     # Used as input to indicators
+        self.candles = candles  # Used as input to indicators
 
-        self.__indicator_lst = []   # List of indicator functions to choose from
+        self.__indicator_lst = []  # List of indicator functions to choose from
         for module in modules:
             # Ignore 'adx' cause of "invalid value encountered in scalar divide" warning
             self.__indicator_lst.extend(
@@ -71,8 +85,8 @@ class ChromosomeHandler:
         Return dictionary with key: 'indicators', 'params', 'constants', 'expression', 'function'
         """
         chromosome = copy.deepcopy(self.CHROMOSOME_FORMAT)
-        chromosome['expression'] = self.__gen_dnf_list(chromosome)
-        chromosome['function'] = self.dnf_list_to_function(chromosome["expression"])
+        chromosome["expression"] = self.__gen_dnf_list(chromosome)
+        chromosome["function"] = self.dnf_list_to_function(chromosome["expression"])
         return chromosome
 
     # ==================== DNF EXPRESSION ====================
@@ -115,15 +129,11 @@ class ChromosomeHandler:
 
         # Add indicator to chromosome
         if rand_num < 1 / 3:
-            chromosome["indicators"].append(
-                random.choice(self.__indicator_lst)
-            )
+            chromosome["indicators"].append(random.choice(self.__indicator_lst))
             chromosome["params"].append(
                 self.__gen_indicator_param(chromosome["indicators"][-1])
             )
-            return (
-                f'{self.__VAL1_NAME}[{len(chromosome["indicators"]) - 1}]'
-            )
+            return f'{self.__VAL1_NAME}[{len(chromosome["indicators"]) - 1}]'
 
         # Add candle name to chromosome
         elif rand_num < 2 / 3:
@@ -136,9 +146,10 @@ class ChromosomeHandler:
 
     def __gen_constant(self, chromosome: dict) -> float:
         """Add constant to chromosome"""
-        chromosome["constants"].append(round(random.uniform(0, CONST_MAX), DECIMAL_PLACES))
+        chromosome["constants"].append(
+            round(random.uniform(0, CONST_MAX), DECIMAL_PLACES)
+        )
         return f'{self.__VAL3_NAME}[{len(chromosome["constants"]) - 1}]'
-        
 
     # ==================== INDICATORS ====================
 
@@ -152,7 +163,7 @@ class ChromosomeHandler:
         # Automatically fill in parameters with default values
         for param in inspect.signature(indicator[1]).parameters.values():
             # param for candles have no default value, save candle name
-            if param.default == inspect._empty:  
+            if param.default == inspect._empty:
                 param_lst[param.name] = self.candles[param.name]
             # bools are ints???? generate random int in range
             elif isinstance(param.default, int) and not isinstance(param.default, bool):
@@ -201,16 +212,28 @@ class ChromosomeHandler:
                 if i != len(dnf) - 1:
                     expr += " or "
             return expr
-                
+
         # Replace names with symbols, forgive me for this mess
         for i in range(len(dnf)):
             conj = dnf[i]
             for j in range(len(conj)):
                 lit = conj[j]
                 lit = re.sub("not ", "¬", lit)
-                lit = re.sub(re.escape(ChromosomeHandler.__VAL1_NAME) + r"\[\d+\]", ChromosomeHandler.__VAL1, lit)
-                lit = re.sub(re.escape(ChromosomeHandler.__VAL2_NAME) + r"\[\d+\]", ChromosomeHandler.__VAL2, lit)
-                lit = re.sub(re.escape(ChromosomeHandler.__VAL3_NAME) + r"\[\d+\]", ChromosomeHandler.__VAL3, lit)
+                lit = re.sub(
+                    re.escape(ChromosomeHandler.__VAL1_NAME) + r"\[\d+\]",
+                    ChromosomeHandler.__VAL1,
+                    lit,
+                )
+                lit = re.sub(
+                    re.escape(ChromosomeHandler.__VAL2_NAME) + r"\[\d+\]",
+                    ChromosomeHandler.__VAL2,
+                    lit,
+                )
+                lit = re.sub(
+                    re.escape(ChromosomeHandler.__VAL3_NAME) + r"\[\d+\]",
+                    ChromosomeHandler.__VAL3,
+                    lit,
+                )
                 expr += lit
                 # Add AND between literals unless it's the last one
                 if j != len(conj) - 1:
@@ -224,7 +247,7 @@ class ChromosomeHandler:
         """Convert a DNF expression list to a function"""
         expr = ChromosomeHandler.dnf_list_to_str(dnf, symbolic=False)
 
-        func_signature = f"""def dnf_func(self, time, params):
+        func_signature = f"""def dnf_func(self, time):
             return {expr}
         """
 
@@ -232,7 +255,6 @@ class ChromosomeHandler:
         temp = types.ModuleType("temp_module")
         exec(func_signature, temp.__dict__)
         return temp.dnf_func
-
 
     # ==================== DNF MANIPULATION ====================
 
@@ -247,20 +269,26 @@ class ChromosomeHandler:
         val_1, rest = lit.split(" > ", 1)
         constant, val_2 = rest.split(" * ", 1)
         return f"({val_2} > {constant} * {val_1})"
-    
+
 
 if __name__ == "__main__":
     """Example usage"""
     from candle import get_candles
-    
+
     candles = get_candles()
-    handler = ChromosomeHandler(candles, [ta.momentum, ta.volatility, ta.volume, ta.trend])
-    
+    handler = ChromosomeHandler(
+        candles, [ta.momentum, ta.volatility, ta.volume, ta.trend]
+    )
+
     c = handler.generate_chromosome()
 
     expression = c["expression"]
     print(f"EXPRESSION SYMBOLIC:\n{ChromosomeHandler.dnf_list_to_str(expression)}")
-    print(f"EXPRESSION SYMBOLIC SYMMETRIC:\n{ChromosomeHandler.to_symmetric_literals(ChromosomeHandler.dnf_list_to_str(expression))}")
+    print(
+        f"EXPRESSION SYMBOLIC SYMMETRIC:\n{ChromosomeHandler.to_symmetric_literals(ChromosomeHandler.dnf_list_to_str(expression))}"
+    )
     print(f"EXPRESSION LIST:\n{expression}")
-    print(f"EXPRESSION:\n{ChromosomeHandler.dnf_list_to_str(expression, symbolic=False)}")
+    print(
+        f"EXPRESSION:\n{ChromosomeHandler.dnf_list_to_str(expression, symbolic=False)}"
+    )
     print(f"DICTOINARY:\n{c}")
