@@ -1,4 +1,5 @@
-from typing import Tuple
+import types
+from typing import Callable, Tuple
 import inspect
 import ta.momentum
 import ta.trend
@@ -28,7 +29,7 @@ class ChromosomeHandler:
     - "candle_names": list of candle names for each candle_values() in expression
     """
 
-    # DISPLAY ONLY - used instead of function names for brevity
+    # DISPLAY ONLY - symbolic names used instead of function names for brevity
     __VAL1 = "A"
     __VAL2 = "B"
     __VAL3 = "C"
@@ -170,23 +171,41 @@ class ChromosomeHandler:
                 print(e)
                 print(param_lst)
 
-    # =============== HELPER FUNCTIONS ============================
+    # =============== CONVERSION FUNCTIONS ============================
 
     @staticmethod
-    def dnf_list_to_str(dnf: list) -> str:
-        """Convert a DNF expression list to a string, for display purposes"""
+    def dnf_list_to_str(dnf: list, symbolic: bool = True) -> str:
+        """Convert a DNF expression list to a string, for display purposes
+        
+        Parameters:
+        ----------
+            symbolic: bool
+                If True, replace names with symbols, else keep names
+        """
         expr = ""
+        if symbolic:
+            # Convert list representation to a string
+            for i in range(len(dnf)):
+                conj = dnf[i]
+                for j in range(len(conj)):
+                    lit = conj[j]
+                    expr += lit
+                    if j != len(conj) - 1:
+                        expr += " and "
+                if i != len(dnf) - 1:
+                    expr += " or "
+            return expr
+                
+        # Replace names with symbols, forgive me for this mess
         for i in range(len(dnf)):
             conj = dnf[i]
             for j in range(len(conj)):
                 lit = conj[j]
-                # Replace names with symbols, forgive me for this mess
                 lit = re.sub("not ", "¬", lit)
                 lit = re.sub(re.escape(ChromosomeHandler.__VAL1_NAME) + r"\[\d+\]", ChromosomeHandler.__VAL1, lit)
                 lit = re.sub(re.escape(ChromosomeHandler.__VAL2_NAME) + r"\[\d+\]", ChromosomeHandler.__VAL2, lit)
                 lit = re.sub(re.escape(ChromosomeHandler.__VAL3_NAME) + r"\[\d+\]", ChromosomeHandler.__VAL3, lit)
                 expr += lit
-
                 # Add AND between literals unless it's the last one
                 if j != len(conj) - 1:
                     expr += " ∧ "
@@ -194,6 +213,18 @@ class ChromosomeHandler:
                 expr += " ∨ "
         return expr
 
+    @staticmethod
+    def dnf_list_to_function(dnf: list) -> Callable:
+        expr = ChromosomeHandler.dnf_list_to_str(dnf, symbolic=False)
+
+        func_signature = f"""def dnf_func(self, time, params):
+            return {expr}
+        """
+
+        # Create temporary module to store function
+        temp = types.ModuleType("temp_module")
+        exec(func_signature, temp.__dict__)
+        return temp.dnf_func
 
 if __name__ == "__main__":
     c, expression = ChromosomeHandler.generate_chromosome()

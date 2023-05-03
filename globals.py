@@ -1,18 +1,19 @@
 # Sigma determines spread of Gaussian, used in mutation
 import time
 from functools import wraps
+from typing import Final
 
 
 # Sigma determines spread of Gaussian, used in mutation
-INT_GAUSSIAN_SIGMA = 3
-CONSTANT_GAUSSIAN_SIGMA = 0.5
-FLOAT_GAUSSIAN_SIGMA = 0.5
+INT_GAUSSIAN_SIGMA: Final[int] = 3
+CONSTANT_GAUSSIAN_SIGMA: Final[float] = 0.5
+FLOAT_GAUSSIAN_SIGMA: Final[float] = 0.5
 
 # Offset from default int or float value, range is +/- this value
-INT_OFFSET = 30
-FLOAT_OFFSET = 5
-DECIMAL_PLACES = 3
-CONST_MAX = 5
+INT_OFFSET: Final[int] = 30
+FLOAT_OFFSET: Final[int] = 5
+DECIMAL_PLACES: Final[int] = 3
+CONST_MAX: Final[int] = 5
 
 
 def timer_decorator(func):
