@@ -26,7 +26,7 @@ class Tournament:
       size: int,
       num_parents: int,
       num_iterations: int,
-      mutation_probability: float = 0.5,
+      mutation_probability: float = 0.05,
       n_best_individuals: int = 3,
   ) -> None:
     """
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
   train_candles, test_candles = get_candles_split(0.8)
 
-  t = Tournament(train_candles, size=200, num_parents=20, num_iterations=20)
+  t = Tournament(train_candles, size=70, num_parents=50, num_iterations=100)
   t.play()
 
   filename = "results/best_strategies.json"
@@ -128,5 +128,5 @@ if __name__ == "__main__":
   print(strat)
 
   strat = Strategy.from_json(test_candles, filename)[0]
-  strat.evaluate(graph=False)
+  strat.evaluate(graph=True)
   print(strat)
