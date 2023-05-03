@@ -7,6 +7,7 @@ Ideas:
 - Could have separate indicators with separate params for buy and sell triggers.
 """
 
+import types
 from typing import Callable, Any
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -24,7 +25,7 @@ class Strategy:
     def __init__(
         self,
         candles: pd.DataFrame,
-        chromosome: dict[str, Any] | None = None,
+        chromosome: dict[str, Any],
         market="BTC/AUD",
     ) -> None:
         """
@@ -53,7 +54,6 @@ class Strategy:
 
     def set_chromosome(self, chromosome: dict[str, int | float]):
         """Given a chromosome, set all indicators."""
-        self.buy_trigger = chromosome["function"]
         self.n_indicators = len(chromosome["indicators"])
         self.indicators = []
         # For each indicator, provide respective params and generate DataFrame features
@@ -61,19 +61,9 @@ class Strategy:
             self.indicators.append(
                 chromosome["indicators"][i][1](**chromosome["params"][i])
             )
+        self.buy_trigger = types.MethodType(chromosome["function"], self)
+        self.sell_trigger = types.MethodType(chromosome["function"], self)
 
-    def sell_trigger(self, t: int) -> bool:
-        """
-        Return True if should sell at time period t, else False.
-        """
-        return (
-            (self.sma2[t] > self.chromosome["constants"][3] * self.sma1[t])
-            or (self.ema[t] > self.chromosome["constants"][4] * self.close[t])
-            or (
-                self.close[t]
-                > self.chromosome["constants"][5] * self.bollinger_hband[t]
-            )
-        )
 
     def evaluate(self, graph: bool = False) -> float:
         """
@@ -231,14 +221,12 @@ if __name__ == "__main__":
 
     candles = get_candles()
 
-    handler = ChromosomeHandler(candles)
-    c1 = handler.generate_chromosome()
-    s = Strategy(candles, c1)
 
     best_fitness = 0
     # Randomly generate strategies and write the best to a file
     while True:
-        strat = Strategy(candles)
-        print(f"Strategy fitness {strat.fitness:.2f}\n")
-        print(strat)
-        strat.evaluate(graph=True)
+        handler = ChromosomeHandler(candles)
+        c1 = handler.generate_chromosome()
+        s = Strategy(candles, c1)
+        s.buy_trigger(2)
+        s.sell_trigger(3)

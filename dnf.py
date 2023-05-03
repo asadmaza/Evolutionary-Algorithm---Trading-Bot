@@ -40,7 +40,7 @@ class ChromosomeHandler:
 
     # Change below to match signature in Strategy class
     __VAL1_NAME = "self.indicators"
-    __VAL2_NAME = "self.chromosome['candle_names']"
+    __VAL2_NAME = "self.candles[self.chromosome['candle_names']"
     __VAL3_NAME = "self.chromosome['constants']"
 
     # Discourage long expressions, adjust as needed
@@ -133,14 +133,14 @@ class ChromosomeHandler:
             chromosome["params"].append(
                 self.__gen_indicator_param(chromosome["indicators"][-1])
             )
-            return f'{self.__VAL1_NAME}[{len(chromosome["indicators"]) - 1}]'
+            return f'{self.__VAL1_NAME}[{len(chromosome["indicators"]) - 1}][t]'
 
         # Add candle name to chromosome
         elif rand_num < 2 / 3:
             chromosome["candle_names"].append(
                 random.choice(["open", "high", "low", "close", "volume"])
             )
-            return f'{self.__VAL2_NAME}[{len(chromosome["candle_names"]) - 1}]'
+            return f'{self.__VAL2_NAME}[{len(chromosome["candle_names"]) - 1}]][t]'
 
         return self.__gen_constant(chromosome)
 
@@ -247,7 +247,7 @@ class ChromosomeHandler:
         """Convert a DNF expression list to a function"""
         expr = ChromosomeHandler.dnf_list_to_str(dnf, symbolic=False)
 
-        func_signature = f"""def dnf_func(self, time):
+        func_signature = f"""def dnf_func(self, t):
             return {expr}
         """
 
