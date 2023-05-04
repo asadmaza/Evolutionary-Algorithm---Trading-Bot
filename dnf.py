@@ -53,6 +53,8 @@ class ChromosomeHandler:
         "params": [],
         "candle_names": [],
         "constants": [],
+        "expressions": [],
+        "functions": [],
     }
 
     def __init__(
@@ -80,13 +82,19 @@ class ChromosomeHandler:
                 ]
             )
 
-    def generate_chromosome(self) -> dict:
+    def generate_chromosome(self, n_expressions: int = 2) -> dict:
         """
         Return dictionary with key: 'indicators', 'params', 'constants', 'expression', 'function'
+
+        Parameters:
+        ----------
+            n_expression: int
+                number of DNF expressions to generate
         """
         chromosome = copy.deepcopy(self.CHROMOSOME_FORMAT)
-        chromosome["expression"] = self.__gen_dnf_list(chromosome)
-        chromosome["function"] = self.dnf_list_to_function(chromosome["expression"])
+        for _ in range(n_expressions):
+            chromosome["expressions"].append(self.__gen_dnf_list(chromosome))
+            chromosome["functions"].append(self.dnf_list_to_function(chromosome["expressions"][-1]))
         return chromosome
 
     # ==================== DNF EXPRESSION ====================
@@ -220,12 +228,12 @@ class ChromosomeHandler:
                 lit = conj[j]
                 lit = re.sub("not ", "¬", lit)
                 lit = re.sub(
-                    re.escape(ChromosomeHandler.__VAL1_NAME) + r"\[\d+\]",
+                    re.escape(ChromosomeHandler.__VAL1_NAME) + r"\[\d+\]\[t\]",
                     ChromosomeHandler.__VAL1,
                     lit,
                 )
                 lit = re.sub(
-                    re.escape(ChromosomeHandler.__VAL2_NAME) + r"\[\d+\]",
+                    re.escape(ChromosomeHandler.__VAL2_NAME) + r"\[\d+\]]\[t\]",
                     ChromosomeHandler.__VAL2,
                     lit,
                 )
@@ -282,13 +290,14 @@ if __name__ == "__main__":
 
     c = handler.generate_chromosome()
 
-    expression = c["expression"]
-    print(f"EXPRESSION SYMBOLIC:\n{ChromosomeHandler.dnf_list_to_str(expression)}")
-    print(
-        f"EXPRESSION SYMBOLIC SYMMETRIC:\n{ChromosomeHandler.to_symmetric_literals(ChromosomeHandler.dnf_list_to_str(expression))}"
-    )
-    print(f"EXPRESSION LIST:\n{expression}")
-    print(
-        f"EXPRESSION:\n{ChromosomeHandler.dnf_list_to_str(expression, symbolic=False)}"
-    )
-    print(f"DICTOINARY:\n{c}")
+    for e in c["expressions"]:
+        print(f"EXPRESSION SYMBOLIC:\n\t\t{ChromosomeHandler.dnf_list_to_str(e)}\n")
+        print(
+            f"EXPRESSION SYMBOLIC SYMMETRIC:\n\t\t{ChromosomeHandler.to_symmetric_literals(ChromosomeHandler.dnf_list_to_str(e))}\n"
+        )
+        print(f"EXPRESSION LIST:\n\t\t{e}\n")
+        print(
+            f"EXPRESSION:\n\t\t{ChromosomeHandler.dnf_list_to_str(e, symbolic=False)}\n"
+        )
+        print(f"DICTOINARY:\n\t\t{c}\n")
+        print('-'*50)

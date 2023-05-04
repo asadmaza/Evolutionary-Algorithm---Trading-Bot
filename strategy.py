@@ -54,6 +54,12 @@ class Strategy:
 
     def set_chromosome(self, chromosome: dict[str, int | float]):
         """Given a chromosome, set all indicators."""
+        if len(chromosome["indicators"]) != len(chromosome["params"]):
+            raise ValueError("Chromosome must have same number of indicators and params")
+        
+        if len(chromosome["functions"]) != 2 or len(chromosome["expressions"]) != 2:
+            raise ValueError("Chromosome must have 2 functions")
+
         self.n_indicators = len(chromosome["indicators"])
         self.indicators = []
         # For each indicator, provide respective params and generate DataFrame features
@@ -61,8 +67,8 @@ class Strategy:
             self.indicators.append(
                 chromosome["indicators"][i][1](**chromosome["params"][i])
             )
-        self.buy_trigger = types.MethodType(chromosome["function"], self)
-        self.sell_trigger = types.MethodType(chromosome["function"], self)
+        self.buy_trigger = types.MethodType(chromosome["functions"][0], self)
+        self.sell_trigger = types.MethodType(chromosome["functions"][1], self)
 
 
     def evaluate(self, graph: bool = False) -> float:
@@ -228,5 +234,6 @@ if __name__ == "__main__":
         handler = ChromosomeHandler(candles)
         c1 = handler.generate_chromosome()
         s = Strategy(candles, c1)
-        s.buy_trigger(2)
-        s.sell_trigger(3)
+        print(s.buy_trigger(2))
+        print(s.sell_trigger(3))
+        print()
