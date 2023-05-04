@@ -227,7 +227,6 @@ class Strategy:
       data = json.load(f)
       strategies = []
       for i in range(len(data)):
-        print(data[i]['fitness'])
         data[i]["window_sizes"] = np.array(data[i]["window_sizes"])
         data[i]["window_devs"] = np.array(data[i]["window_devs"])
         data[i]["constants"] = np.array(data[i]["constants"])

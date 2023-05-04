@@ -117,14 +117,14 @@ if __name__ == "__main__":
 
   train_candles, test_candles = get_candles_split(0.8)
 
-  t = Tournament(train_candles, size=70, num_parents=50, num_iterations=100)
+  t = Tournament(train_candles, size=70, num_parents=50, num_iterations=50)
   t.play()
 
   filename = "results/best_strategies.json"
 
   t.write_best(filename, 10)
   strat = Strategy.from_json(train_candles, filename)[0]
-  strat.evaluate(graph=False)
+  strat.evaluate(graph=True)
   print(strat)
 
   strat = Strategy.from_json(test_candles, filename)[0]
