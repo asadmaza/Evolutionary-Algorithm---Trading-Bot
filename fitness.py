@@ -104,77 +104,81 @@ class Fitness:
       sharpe_ratio = (avg_daily_return - self.rf) / std_dev_daily_return
 
     return sharpe_ratio
-  
 
   def get_daily_profit_raw(self, strat):
     up = 0
     for i in range(1, len(strat.close_prices)):
-      if (strat.close_prices[i] > strat.close_prices[i-1]): strat.close_prices[i]-strat.close_prices[i-1]
-      else: up -= strat.close_prices[i]-strat.close_prices[i-1]
-  
+      if (strat.close_prices[i] > strat.close_prices[i - 1]):
+        strat.close_prices[i] - strat.close_prices[i - 1]
+      else:
+        up -= strat.close_prices[i] - strat.close_prices[i - 1]
+
     return up
 
   def get_sterling_ratio(self, strat):
-      daily_returns = []
-      self.rf = 0.012 / 365
-      target_return = 0
-      lookback_period = 252
-      downside_deviation = 0
-      excess_returns = []
-      
-      for i in range(1, len(strat.close_prices)):
-          daily_return = (strat.close_prices[i] - strat.close_prices[i - 1]) / strat.close_prices[i - 1]
-          daily_returns.append(daily_return)
-          
-          if i > lookback_period:
-              avg_daily_return = sum(daily_returns[-lookback_period:]) / lookback_period
-              
-              excess_return = avg_daily_return - self.rf
-              excess_returns.append(excess_return)
-              
-              for return_value in daily_returns[-lookback_period:]:
-                  if return_value < target_return:
-                      downside_deviation += (return_value - target_return) ** 2
+    daily_returns = []
+    self.rf = 0.012 / 365
+    target_return = 0
+    lookback_period = 252
+    downside_deviation = 0
+    excess_returns = []
 
-              downside_deviation = math.sqrt(downside_deviation / lookback_period)
+    for i in range(1, len(strat.close_prices)):
+      daily_return = (
+          strat.close_prices[i] - strat.close_prices[i - 1]) / strat.close_prices[i - 1]
+      daily_returns.append(daily_return)
 
-              if downside_deviation == 0:
-                  return 0
-              else:
-                  ster_ratio = (excess_return / downside_deviation) * math.sqrt(lookback_period)
-                  return ster_ratio
-      
-      return 0
+      if i > lookback_period:
+        avg_daily_return = sum(
+            daily_returns[-lookback_period:]) / lookback_period
 
+        excess_return = avg_daily_return - self.rf
+        excess_returns.append(excess_return)
+
+        for return_value in daily_returns[-lookback_period:]:
+          if return_value < target_return:
+            downside_deviation += (return_value - target_return) ** 2
+
+        downside_deviation = math.sqrt(downside_deviation / lookback_period)
+
+        if downside_deviation == 0:
+          return 0
+        else:
+          ster_ratio = (excess_return / downside_deviation) * \
+              math.sqrt(lookback_period)
+          return ster_ratio
+
+    return 0
 
   def get_calmar_ratio(self, strat):
-      daily_returns = []
-      self.rf = 0.012 / 365
-      lookback_period = 252
-      max_drawdown = 0
-      current_max = strat.close_prices[0]
+    daily_returns = []
+    self.rf = 0.012 / 365
+    lookback_period = 252
+    max_drawdown = 0
+    current_max = strat.close_prices[0]
 
-      for i in range(1, len(strat.close_prices)):
-          daily_return = (strat.close_prices[i] - strat.close_prices[i - 1]) / strat.close_prices[i - 1]
-          daily_returns.append(daily_return)
-          
-          if strat.close_prices[i] > current_max:
-              current_max = strat.close_prices[i]
-          else:
-              drawdown = (current_max - strat.close_prices[i]) / current_max
-              if drawdown > max_drawdown:
-                  max_drawdown = drawdown
+    for i in range(1, len(strat.close_prices)):
+      daily_return = (
+          strat.close_prices[i] - strat.close_prices[i - 1]) / strat.close_prices[i - 1]
+      daily_returns.append(daily_return)
 
-          if i > lookback_period:
-              avg_daily_return = sum(daily_returns[-lookback_period:]) / lookback_period
-              if max_drawdown == 0:
-                return 0
-              calmar_ratio = avg_daily_return / max_drawdown
+      if strat.close_prices[i] > current_max:
+        current_max = strat.close_prices[i]
+      else:
+        drawdown = (current_max - strat.close_prices[i]) / current_max
+        if drawdown > max_drawdown:
+          max_drawdown = drawdown
 
-              return calmar_ratio
+      if i > lookback_period:
+        avg_daily_return = sum(
+            daily_returns[-lookback_period:]) / lookback_period
+        if max_drawdown == 0:
+          return 0
+        calmar_ratio = avg_daily_return / max_drawdown
 
-      return 0
+        return calmar_ratio
 
+    return 0
 
   def get_sortino_raw(self, strat):
     daily_returns = []
