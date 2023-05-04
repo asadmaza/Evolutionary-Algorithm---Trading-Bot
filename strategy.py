@@ -16,14 +16,15 @@ import json
 import uuid
 
 from globals import *
-from dnf import ChromosomeHandler
+from dnf import Chromosome, ChromosomeHandler
 
 
 class Strategy:
     def __init__(
         self,
         candles: pd.DataFrame,
-        chromosome: dict[str, Any] = None,
+        buy_chromosome: Chromosome = None,
+        sell_chromosome: Chromosome = None,
         chromosome_handler: ChromosomeHandler = None,
         market="BTC/AUD",
     ) -> None:
@@ -44,28 +45,27 @@ class Strategy:
         self.id = uuid.uuid4()
         self.close_prices = []
 
-        if chromosome is None and chromosome_handler is None:
-            raise ValueError("Must provide either chromosome or chromosome_handler")
+        if buy_chromosome is None and sell_chromosome is None and chromosome_handler is None:
+            raise ValueError("Must provide either chromosomes or chromosome_handler")
 
-        self.set_chromosome(chromosome or chromosome_handler.generate_chromosome())
+        self.set_chromosome(
+            buy_chromosome or chromosome_handler.generate_chromosome(), is_buy=True
+        )
+        self.set_chromosome(
+            sell_chromosome or chromosome_handler.generate_chromosome(), is_buy=False
+        )
 
         self.portfolio = self.evaluate()  # evaluate fitness once on init
         self.fitness = None
 
-    def set_chromosome(self, chromosome: dict[str, int | float]):
+    def set_chromosome(self, c: Chromosome, is_buy: bool) -> None:
         """Given a chromosome, set all indicators and triggers"""
-        self.chromosome = chromosome
-        if (len(chromosome["indicators"]) != len(chromosome["candle_params"]) or 
-        len(chromosome["indicators"]) != len(chromosome["int_params"]) or 
-        len(chromosome["indicators"]) != len(chromosome["float_params"])):
-            raise ValueError(
-                "Chromosome must have same number of indicators and params"
-            )
-
-        if len(chromosome["functions"]) != 2 or len(chromosome["expressions"]) != 2:
-            raise ValueError("Chromosome must have 2 functions for buy and sell")
-
-        self.n_indicators = len(chromosome["indicators"])
+        if is_buy:
+            self.buy_chromosome = c
+        else:
+            self.sell_chromosome = c
+            
+        self.n_indicators = len(c.indicators)
         self.indicators = []
         # For each indicator, provide respective params and generate DataFrame features
         # Buy and sell triggers call self.indicators, hence we need to generate them
@@ -76,11 +76,9 @@ class Strategy:
                 params[candle_name] = self.candles[candle_name]
             # Convert (arg, value) tuples to dict pairs
             for param in [chromosome["int_params"][i], chromosome["float_params"][i]]:
-                params.update({entry['arg']: entry['value'] for entry in param})
+                params.update({entry["arg"]: entry["value"] for entry in param})
 
-            self.indicators.append(
-                chromosome["indicators"][i][1](**params)
-            )
+            self.indicators.append(chromosome["indicators"][i][1](**params))
 
         self.buy_trigger = types.MethodType(chromosome["functions"][0], self)
         self.sell_trigger = types.MethodType(chromosome["functions"][1], self)
@@ -108,7 +106,7 @@ class Strategy:
 
         quote = 100  # AUD
         base = 0  # BTC
-        bought, sold = 0, 0    # number of times bought and sold
+        bought, sold = 0, 0  # number of times bought and sold
         self.close_prices = [quote]
 
         for t in range(1, len(self.close)):
@@ -170,7 +168,7 @@ class Strategy:
                 )
 
         if graph:
-            plt.legend(prop={'size': 6})
+            plt.legend(prop={"size": 6})
             plt.savefig("graph.png", dpi=300)
             plt.clf()
             plt.cla()
@@ -214,7 +212,7 @@ class Strategy:
                             indocators += [name, getattr(m, name)]
                         except e:
                             continue
-                            
+
                 chromosome = {
                     "indicators": indicators,
                     "candle_names": data[i]["candle_names"],
@@ -246,9 +244,9 @@ if __name__ == "__main__":
     candles = get_candles()
 
     best_portfolio = 0
-    #modules = [ta.trend, ta.momentum, ta.volatility, ta.volume, ta.others]
+    # modules = [ta.trend, ta.momentum, ta.volatility, ta.volume, ta.others]
     handler = ChromosomeHandler()
-    #strat = Strategy.from_json(candles, "best_strategy.json", modules)[0]
+    # strat = Strategy.from_json(candles, "best_strategy.json", modules)[0]
     while True:
         c = handler.generate_chromosome()
         strat = Strategy(candles, c)
