@@ -95,9 +95,10 @@ class ChromosomeHandler:
         """
         chromosome = copy.deepcopy(self.CHROMOSOME_FORMAT)
         for _ in range(n_expressions):
-            chromosome["expressions"].append(self.__gen_dnf_list(chromosome))
+            dnf_list = self.__gen_dnf_list(chromosome)
+            chromosome["expressions"].append(self.dnf_list_to_str(dnf_list))
             chromosome["functions"].append(
-                self.dnf_list_to_function(chromosome["expressions"][-1])
+                self.dnf_list_to_function(dnf_list)
             )
         chromosome["constants"] = np.array(chromosome["constants"], dtype=np.float16)
         return chromosome
@@ -141,7 +142,7 @@ class ChromosomeHandler:
         rand_num = random.uniform(0, 1)
 
         # Add indicator to chromosome
-        if rand_num < 3 / 6:
+        if rand_num < 0.6:
             chromosome["indicators"].append(random.choice(self.__indicator_lst))
             c_params, i_params, f_params = self.__gen_indicator_params(chromosome["indicators"][-1])
             chromosome["candle_params"] += [c_params]
@@ -150,7 +151,7 @@ class ChromosomeHandler:
             return f'{self.__VAL1_NAME}[{len(chromosome["indicators"]) - 1}][t]'
 
         # Add candle name to chromosome
-        elif rand_num < 2 / 6:
+        elif rand_num < 0.8:
             chromosome["candle_names"].append(
                 random.choice(self.candle_names)
             )
@@ -273,6 +274,49 @@ class ChromosomeHandler:
         exec(func_signature, temp.__dict__)
         return temp.dnf_func
 
+    @staticmethod
+    def dnf_str_to_list(expr: str) -> list:
+        """Convert a DNF expression string to a list"""
+
+    @staticmethod
+    def chromosome_to_list(dnf_str: str) -> list:
+        and_symbol = " ∧ "
+        or_symbol = " ∨ "
+        if "and" in dnf_str or "or" in dnf_str:
+            and_symbol = " and "
+            or_symbol = " or "
+
+        dnf_list = []
+
+        # Split the string into disjunctions
+        disjunctions = dnf_str.split(or_symbol)
+        counters = {
+                ChromosomeHandler.__VAL1: 0,
+                ChromosomeHandler.__VAL2: 0,
+                ChromosomeHandler.__VAL3: 0
+        }
+
+        for disj in disjunctions:
+            # Split the disjunction into conjunctions
+            conjunctions = disj.split(and_symbol)
+            conj_list = []
+
+            for conj in conjunctions:
+                # Replace the symbols with their original names
+                lit = conj.replace("¬", "not ")
+                replacement_func = lambda match: ChromosomeHandler.__replace_values(match, counters)
+                lit = re.sub(
+                    f"{ChromosomeHandler.__VAL1}|{ChromosomeHandler.__VAL2}|{ChromosomeHandler.__VAL3}",
+                    replacement_func,
+                    lit,
+                )
+                conj_list.append(lit)
+
+            dnf_list.append(conj_list)
+
+        return dnf_list
+
+
     # ==================== DNF MANIPULATION ====================
 
     @staticmethod
@@ -280,6 +324,7 @@ class ChromosomeHandler:
         """For dnf string with literals in form 'X > C * Y', replace with 'Y > C * X'"""
         return re.sub(r"\(([^()]+)\)", ChromosomeHandler.__swap_literals, expr)
 
+    @staticmethod
     def __swap_literals(m: re.Match):
         """Swap literals in form 'X > C * Y' to 'Y > C * X'"""
         lit = m.group(1)
@@ -287,6 +332,21 @@ class ChromosomeHandler:
         constant, val_2 = rest.split(" * ", 1)
         return f"({val_2} > {constant} * {val_1})"
 
+    @staticmethod
+    def __replace_values(m: re.Match, counters):
+        value = m.group(0)
+        if value == ChromosomeHandler.__VAL1:
+            index = counters[value]
+            counters[value] += 1
+            return ChromosomeHandler.__VAL1_NAME + f"[{index}][t]"
+        elif value == ChromosomeHandler.__VAL2:
+            index = counters[value]
+            counters[value] += 1
+            return ChromosomeHandler.__VAL2_NAME + f"[{index}][t]"
+        elif value == ChromosomeHandler.__VAL3:
+            index = counters[value]
+            counters[value] += 1
+            return ChromosomeHandler.__VAL3_NAME + f"[{index}]"
 
 if __name__ == "__main__":
     """Example usage"""
@@ -300,12 +360,12 @@ if __name__ == "__main__":
     c = handler.generate_chromosome()
 
     for e in c["expressions"]:
-        print(f"EXPRESSION SYMBOLIC:\n\t\t{ChromosomeHandler.dnf_list_to_str(e)}\n")
+        print(f"EXPRESSION SYMBOLIC:\n\t\t{e}\n")
         print(
-            f"EXPRESSION SYMBOLIC SYMMETRIC:\n\t\t{ChromosomeHandler.to_symmetric_literals(ChromosomeHandler.dnf_list_to_str(e))}\n"
+            f"EXPRESSION SYMBOLIC SYMMETRIC:\n\t\t{ChromosomeHandler.to_symmetric_literals(e)}\n"
         )
         print(
-            f"EXPRESSION:\n\t\t{ChromosomeHandler.dnf_list_to_str(e, symbolic=False)}\n"
+            f"EXPRESSION:\n\t\t{ChromosomeHandler.dnf_str_to_list(e)}\n"
         )
         print(f"EXPRESSION LIST:\n\t\t{e}\n")
         print("-" * 50)

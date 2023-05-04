@@ -14,9 +14,6 @@ from matplotlib import pyplot as plt
 import numpy as np
 import json
 import uuid
-import inspect
-
-import ta
 
 from globals import *
 from dnf import ChromosomeHandler
