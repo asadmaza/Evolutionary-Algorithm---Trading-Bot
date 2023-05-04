@@ -10,8 +10,8 @@ CONSTANT_GAUSSIAN_SIGMA: Final[float] = 0.5
 FLOAT_GAUSSIAN_SIGMA: Final[float] = 0.5
 
 # Offset from default int or float value, range is +/- this value
-INT_OFFSET: Final[int] = 30
-FLOAT_OFFSET: Final[int] = 5
+INT_OFFSET: Final[int] = 10
+FLOAT_OFFSET: Final[int] = 3
 DECIMAL_PLACES: Final[int] = 3
 CONST_MAX: Final[int] = 5
 

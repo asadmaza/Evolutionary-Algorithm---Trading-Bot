@@ -7,6 +7,7 @@ from globals import timer_decorator
 from strategy import Strategy
 from operators import crossover, selection, mutation
 from fitness import Fitness
+from dnf import ChromosomeHandler
 
 import pandas as pd
 
@@ -28,6 +29,7 @@ class Tournament:
         num_iterations: int,
         mutation_probability: float = 0.5,
         n_best_individuals: int = 3,
+        chromosome_handler: ChromosomeHandler = None,
     ) -> None:
         """
         Parameters
@@ -58,7 +60,12 @@ class Tournament:
         self.n_best_individuals = n_best_individuals
         self.candles = candles
 
-        self.strats = [Strategy(candles) for _ in range(self.size)]
+        self.chromosome_handler = chromosome_handler or ChromosomeHandler(self.candles)
+
+        self.strats = [
+            Strategy(candles, chromosome_handler=self.chromosome_handler)
+            for _ in range(self.size)
+        ]
 
         self.fitness = Fitness(self.strats, batches=4)
 

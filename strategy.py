@@ -8,14 +8,15 @@ Ideas:
 """
 
 import types
-from typing import Callable, Any
+from typing import Any
 import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np
 import json
-from ta.trend import sma_indicator, ema_indicator
-from ta.volatility import bollinger_lband, bollinger_hband
 import uuid
+import inspect
+
+import ta
 
 from globals import *
 from dnf import ChromosomeHandler
@@ -25,7 +26,8 @@ class Strategy:
     def __init__(
         self,
         candles: pd.DataFrame,
-        chromosome: dict[str, Any],
+        chromosome: dict[str, Any] = None,
+        chromosome_handler: ChromosomeHandler = None,
         market="BTC/AUD",
     ) -> None:
         """
@@ -45,31 +47,46 @@ class Strategy:
         self.id = uuid.uuid4()
         self.close_prices = []
 
-        # Chromosome = 5 window sizes + 2 window deviations + 6 constants
-        self.chromosome = chromosome
-        self.set_chromosome(self.chromosome)
+        if chromosome is None and chromosome_handler is None:
+            raise ValueError("Must provide either chromosome or chromosome_handler")
+
+        self.set_chromosome(chromosome or chromosome_handler.generate_chromosome())
 
         self.portfolio = self.evaluate()  # evaluate fitness once on init
         self.fitness = None
 
     def set_chromosome(self, chromosome: dict[str, int | float]):
-        """Given a chromosome, set all indicators."""
-        if len(chromosome["indicators"]) != len(chromosome["params"]):
-            raise ValueError("Chromosome must have same number of indicators and params")
-        
+        """Given a chromosome, set all indicators and triggers"""
+        self.chromosome = chromosome
+        if (len(chromosome["indicators"]) != len(chromosome["candle_params"]) or 
+        len(chromosome["indicators"]) != len(chromosome["int_params"]) or 
+        len(chromosome["indicators"]) != len(chromosome["float_params"])):
+            raise ValueError(
+                "Chromosome must have same number of indicators and params"
+            )
+
         if len(chromosome["functions"]) != 2 or len(chromosome["expressions"]) != 2:
-            raise ValueError("Chromosome must have 2 functions")
+            raise ValueError("Chromosome must have 2 functions for buy and sell")
 
         self.n_indicators = len(chromosome["indicators"])
         self.indicators = []
         # For each indicator, provide respective params and generate DataFrame features
+        # Buy and sell triggers call self.indicators, hence we need to generate them
         for i in range(self.n_indicators):
+            params = {}
+            # Candle params is a list of olhcv names, replace them with actual Series data
+            for candle_name in chromosome["candle_params"][i]:
+                params[candle_name] = self.candles[candle_name]
+            # Convert (arg, value) tuples to dict pairs
+            for param in [chromosome["int_params"][i], chromosome["float_params"][i]]:
+                params.update({entry['arg']: entry['value'] for entry in param})
+
             self.indicators.append(
-                chromosome["indicators"][i][1](**chromosome["params"][i])
+                chromosome["indicators"][i][1](**params)
             )
+
         self.buy_trigger = types.MethodType(chromosome["functions"][0], self)
         self.sell_trigger = types.MethodType(chromosome["functions"][1], self)
-
 
     def evaluate(self, graph: bool = False) -> float:
         """
@@ -88,21 +105,13 @@ class Strategy:
             plt.plot(self.close, label="Close price")
             for i in range(self.n_indicators):
                 plt.plot(
-                    [
-                        self.sma1,
-                        self.sma2,
-                        self.ema,
-                        self.bollinger_lband,
-                        self.bollinger_hband,
-                    ][i],
-                    label=["SMA1", "SMA2", "EMA", "Bollinger Lband", "Bollinger Hband"][
-                        i
-                    ],
+                    self.indicators[i],
+                    label=self.chromosome["indicators"][i][0],
                 )
 
         quote = 100  # AUD
         base = 0  # BTC
-        bought, sold = 0, 0
+        bought, sold = 0, 0    # number of times bought and sold
         self.close_prices = [quote]
 
         for t in range(1, len(self.close)):
@@ -164,8 +173,10 @@ class Strategy:
                 )
 
         if graph:
-            plt.legend()
-            plt.show(block=True)
+            plt.legend(prop={'size': 6})
+            plt.savefig("graph.png", dpi=300)
+            plt.clf()
+            plt.cla()
 
         self.portfolio = quote
         return quote
@@ -176,46 +187,56 @@ class Strategy:
         """
 
         return {
-            "window_sizes": self.chromosome["window_sizes"].tolist(),
-            "window_devs": self.chromosome["window_devs"].tolist(),
+            "indicators": [i[0] for i in self.chromosome["indicators"]],
+            "candle_names": self.chromosome["candle_names"],
+            "candle_params": [i.tolist() for i in self.chromosome["candle_params"]],
+            "int_params": [i.tolist() for i in self.chromosome["int_params"]],
+            "float_params": [i.tolist() for i in self.chromosome["float_params"]],
             "constants": self.chromosome["constants"].tolist(),
+            "expressions": self.chromosome["expressions"],
             "fitness": self.fitness,
             "portfolio": self.portfolio,
         }
 
     @classmethod
     def from_json(
-        self, candles: pd.DataFrame, filename: str, n: int = 1
+        self, candles: pd.DataFrame, filename: str, modules: list, n: int = 1
     ) -> list["Strategy"]:
         """
         Return a list of n Strategy objects from json file data.
         """
 
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="UTF-8") as f:
             data = json.load(f)
             strategies = []
             for i in range(len(data)):
-                data[i]["window_sizes"] = np.array(data[i]["window_sizes"])
-                data[i]["window_devs"] = np.array(data[i]["window_devs"])
-                data[i]["constants"] = np.array(data[i]["constants"])
+                indicators = []
+                for name in data[i]["indicators"]:
+                    for m in modules:
+                        try:
+                            indocators += [name, getattr(m, name)]
+                        except e:
+                            continue
+                            
+                chromosome = {
+                    "indicators": indicators,
+                    "candle_names": data[i]["candle_names"],
+                    "candle_params": np.array(data[i]["candle_params"]),
+                    "int_params": np.array(data[i]["int_params"]),
+                    "float_params": np.array(data[i]["float_params"]),
+                    "constants": np.array(data[i]["constants"]),
+                    "expressions": data[i]["expressions"],
+                }
+                for e in chromosome["expressions"]:
+                    e["function"] = ChromosomeHandler.dnf_list_to_function(e)
+
+                self.set_chromosome(candles, data[i]["chromosome"])
                 strategies.append(Strategy(candles, data[i]))
 
             return strategies
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.to_json()}>"
-
-    @staticmethod
-    def gen_random_chromosome(n_window: int, n_constant: int, n_window_dev: int):
-        return {
-            "window_sizes": np.random.randint(1, INT_OFFSET, size=n_window),
-            "window_devs": np.round(
-                np.random.uniform(1, FLOAT_OFFSET, size=n_window_dev), DECIMAL_PLACES
-            ),
-            "constants": np.round(
-                np.random.uniform(0, CONST_MAX, size=n_constant), DECIMAL_PLACES
-            ),
-        }
 
 
 if __name__ == "__main__":
@@ -227,13 +248,17 @@ if __name__ == "__main__":
 
     candles = get_candles()
 
-
-    best_fitness = 0
-    # Randomly generate strategies and write the best to a file
+    best_portfolio = 0
+    #modules = [ta.trend, ta.momentum, ta.volatility, ta.volume, ta.others]
+    handler = ChromosomeHandler()
+    #strat = Strategy.from_json(candles, "best_strategy.json", modules)[0]
     while True:
-        handler = ChromosomeHandler(candles)
-        c1 = handler.generate_chromosome()
-        s = Strategy(candles, c1)
-        print(s.buy_trigger(2))
-        print(s.sell_trigger(3))
-        print()
+        c = handler.generate_chromosome()
+        strat = Strategy(candles, c)
+        if strat.portfolio > best_portfolio:
+            best_portfolio = strat.portfolio
+            print(f"New best portfolio: {best_portfolio:.2f}\n")
+            print(strat)
+            strat.evaluate(True)
+            with open("best_strategy.json", "w", encoding="UTF-8") as f:
+                json.dump(strat.to_json(), f)
