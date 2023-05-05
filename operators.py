@@ -2,12 +2,16 @@
 Genetic operators: selection, mutation, crossover.
 """
 
+import copy
 import random
+from typing import Tuple
 
 import numpy as np
 
 from strategy import Strategy
 from globals import *
+
+from chromosome import Chromosome, ChromosomeHandler
 
 
 def mutation(
@@ -21,18 +25,18 @@ def mutation(
     distribution, and added to the current value
     """
     # Go through each param list, and mutate each value with probability `prob`
-    for name in strategy.chromosome.keys():
+    for int_param in strategy.chromosome.keys():
         # Convert to float to allow adding Gaussian noise
-        gene = strategy.chromosome[name].astype(np.float64)
+        gene = strategy.buy_chromosome.int_params.astype(np.float64)
 
         # Elements that should be mutated
         mutation_mask = np.random.random(size=len(gene)) < prob
 
-        sigma = __match_gaussian_sigma(name)
+        sigma = __match_gaussian_sigma()
         changes = np.array([random.gauss(0, sigma) for _ in range(len(gene))])
         gene[mutation_mask] += changes[mutation_mask]
 
-        strategy.chromosome[name] = __round_and_clip(gene, name)
+        # strategy.chromosome[name] = __round_and_clip(gene, name)
 
     # Apply the new chromosome to the strategy
     strategy.set_indicators(strategy.chromosome)
@@ -99,6 +103,78 @@ def crossover(parents: list["Strategy"]) -> list["Strategy"]:
     return offspring
 
 
+def __expression_crossover(
+    c1: Chromosome, c2: Chromosome
+) -> Tuple[Chromosome, Chromosome]:
+    """Perform 1-point crossover on two chromosomes and return the two children
+
+    Assumes DNF of both chromosomes have more than 1 literals, otherwise
+    crossover would simply swap both chromosomes.
+    """
+    conj_point1 = random.randint(
+        1 if len(c1.expression_list) != 1 else 0, len(c1.expression_list) - 1
+    )
+    conj_point2 = random.randint(0, len(c2.expression_list) - 1)
+
+    child1 = copy.deepcopy(c1)
+    child2 = copy.deepcopy(c2)
+
+    child1.expression_list[conj_point1:], child2.expression_list[conj_point2:] = (
+        child2.expression_list[conj_point2:],
+        child1.expression_list[conj_point1:],
+    )
+
+    __match_symbol_lengths(c1, c2, child1, conj_point1, conj_point2)
+    __match_symbol_lengths(c2, c1, child2, conj_point2, conj_point1)
+
+    return child1, child2
+
+
+def __match_symbol_lengths(
+    parent1: Chromosome,
+    parent2: Chromosome,
+    child: Chromosome,
+    point1: int,
+    point2: int,
+):
+    """
+    Ensure the number of indicators, constants, and params match the number of symbols in the new DNF expression
+
+    `parent1` must have the beginning portion of the child's DNF expression!
+    """
+
+    # Get the swapped segments and count A, B, and C symbols in them
+    swapped1 = parent1.expression_list[:point1]
+    swapped2 = parent2.expression_list[point2:]
+    n_A1 = sum(
+        [literal.count(child.A) for conjunction in swapped1 for literal in conjunction]
+    )
+    n_B1 = sum(
+        [literal.count(child.B) for conjunction in swapped1 for literal in conjunction]
+    )
+    n_C1 = sum(
+        [literal.count(child.C) for conjunction in swapped1 for literal in conjunction]
+    )
+    n_A2 = sum(
+        [literal.count(child.A) for conjunction in swapped2 for literal in conjunction]
+    )
+    n_B2 = sum(
+        [literal.count(child.B) for conjunction in swapped2 for literal in conjunction]
+    )
+    n_C2 = sum(
+        [literal.count(child.C) for conjunction in swapped2 for literal in conjunction]
+    )
+
+    child.indicators = parent1.indicators[:n_A1] + parent2.indicators[-n_A2:]
+    child.int_params = parent1.int_params[:n_A1] + parent2.int_params[-n_A2:]
+    child.float_params = parent1.float_params[:n_A1] + parent2.float_params[-n_A2:]
+    child.candle_params = parent1.candle_params[:n_A1] + parent2.candle_params[-n_A2:]
+    child.candle_names = parent1.candle_names[:n_B1] + parent2.candle_names[-n_B2:]
+    child.constants = np.append(parent1.constants[:n_C1], parent2.constants[-n_C2:], 0)
+
+    return child
+
+
 def selection(population: list["Strategy"], n_selections) -> list["Strategy"]:
     """
     Roulette wheel selection, select n_selections individuals from population.
@@ -114,14 +190,21 @@ def selection(population: list["Strategy"], n_selections) -> list["Strategy"]:
     return np.random.choice(population, size=n_selections, p=probs)
 
 
-def gen_random_chromosome(n_window: int, n_constant: int, n_window_dev: int):
-    """Generate random chromosome using settings from globals.py"""
-    return {
-        "window_sizes": np.random.randint(1, INT_OFFSET, size=n_window),
-        "window_devs": np.round(
-            np.random.uniform(1, FLOAT_OFFSET, size=n_window_dev), DECIMAL_PLACES
-        ),
-        "constants": np.round(
-            np.random.uniform(0, CONST_MAX, size=n_constant), DECIMAL_PLACES
-        ),
-    }
+if __name__ == "__main__":
+    ch = ChromosomeHandler()
+    c1 = ch.generate_chromosome()
+    c2 = ch.generate_chromosome()
+    c3, c4 = __expression_crossover(c1, c2)
+    print(c3.expression_str.count(c3.A) == len(c3.indicators))
+    print(c3.expression_str.count(c3.A) == len(c3.int_params))
+    print(c3.expression_str.count(c3.A) == len(c3.float_params))
+    print(c3.expression_str.count(c3.A) == len(c3.candle_params))
+    print(c3.expression_str.count(c3.B) == len(c3.candle_names))
+    print(c3.expression_str.count(c3.C) == len(c3.constants))
+    print()
+    print(c4.expression_str.count(c4.A) == len(c4.indicators))
+    print(c4.expression_str.count(c4.A) == len(c4.int_params))
+    print(c4.expression_str.count(c4.A) == len(c4.float_params))
+    print(c4.expression_str.count(c4.A) == len(c4.candle_params))
+    print(c4.expression_str.count(c4.B) == len(c4.candle_names))
+    print(c4.expression_str.count(c4.C) == len(c4.constants))

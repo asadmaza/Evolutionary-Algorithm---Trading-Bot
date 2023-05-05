@@ -52,9 +52,8 @@ class Chromosome:
     candle_params: list[list[str]] = field(default_factory=list)
     int_params: list[list[str]] = field(default_factory=list)
     float_params: list[list[str]] = field(default_factory=list)
-    constants: list[float] = field(default_factory=list)
-    _expression_str: str = field(default_factory=str)
-    _expression_list: list = field(default_factory=list)
+    constants: np.ndarray[np.float16] = field(default_factory=list)
+    expression_list: list = field(default_factory=list)
 
     # DISPLAY ONLY - symbolic names used instead of function names for brevity
     A = "A"
@@ -68,50 +67,8 @@ class Chromosome:
 
     @property
     def expression_str(self) -> str:
-        if self._expression_str == "":
-            self._expression_str = self.to_str()
-        return self._expression_str
-
-    @property
-    def expression_list(self) -> list:
-        return self._expression_list
-
-    @expression_list.setter
-    def expression_list(self, value: list):
-        # IF self.int_params and self.float_params != n_As
-        # if len self.candle_params != n_Bs
-        #
-        n_A, n_B, n_C = (
-            str(value).count(self.A),
-            str(value).count(self.B),
-            str(value).count(self.C),
-        )
-        if (
-            n_A != len(self.int_params)
-            or n_A != len(self.float_params)
-            or n_A != len(self.candle_params)
-        ):
-            raise ValueError(
-                "Mismatch between number of A symbols and number of indicators"
-                " or sets of indicator parameters"
-            )
-        if n_B != len(self.candle_names):
-            raise ValueError(
-                "Mismatch between number of B symbols and number of candle "
-                "value names"
-            )
-        if n_C != len(self.constants):
-            raise ValueError(
-                "Mismatch between number of C symbols and number of constants"
-            )
-        self._expression_list = value
-        self._expression_str = self.to_str()
-
-    @expression_str.setter
-    def expression_str(self, value: str):
-        raise AttributeError(
-            "Attribute expression_str cannot be set, create a new Chromosome object instead"
-        )
+        if self.expression_list:
+            return self.to_str()
 
     def to_str(self) -> str:
         """Convert internal list representation to string symbols"""
@@ -199,7 +156,7 @@ class ChromosomeHandler:
     """Handles chromosome and DNF expression generation"""
 
     # Discourage long expressions, adjust as needed
-    DNF_PROBABILITY = 0.05
+    DNF_PROBABILITY = 0.6
     CONJ_PROBABILITY = 0.2
     # Probability that indicator or candle value is chosen as value in DNF literal
     INDICATOR_PROBABILITY = 0.6

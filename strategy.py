@@ -8,6 +8,7 @@ Ideas:
 """
 
 import pickle
+from time import sleep
 import types
 from typing import Any
 import pandas as pd
@@ -188,7 +189,7 @@ class Strategy:
 
         if graph:
             plt.legend(prop={"size": 6})
-            plt.savefig("graph.png", dpi=300)
+            plt.savefig("graph.png", dpi=100)
             plt.clf()
             plt.cla()
 
@@ -238,15 +239,15 @@ if __name__ == "__main__":
         data = pickle.load(f)
         strat.load_pickle_data(data)
     strat.evaluate(True)
-    """
+
     while True:
         c = handler.generate_chromosome()
         strat = Strategy(candles, chromosome_handler=handler)
+        print(strat)
+        strat.evaluate(True)
+        sleep(1)
         if strat.portfolio > best_portfolio:
             best_portfolio = strat.portfolio
             print(f"New best portfolio: {best_portfolio:.2f}\n")
-            print(strat)
-            strat.evaluate(True)
             with open("best_strategy.pck", "wb") as f:
                 pickle.dump(strat.get_pickle_data(), f)
-    """

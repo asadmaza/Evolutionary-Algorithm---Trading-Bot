@@ -7,7 +7,7 @@ from globals import timer_decorator
 from strategy import Strategy
 from operators import crossover, selection, mutation
 from fitness import Fitness
-from dnf import ChromosomeHandler
+from chromosome import ChromosomeHandler
 
 import pandas as pd
 
@@ -27,7 +27,7 @@ class Tournament:
         size: int,
         num_parents: int,
         num_iterations: int,
-        mutation_probability: float = 0.5,
+        mutation_probability: float = 0.1,
         n_best_individuals: int = 3,
         chromosome_handler: ChromosomeHandler = None,
     ) -> None:
