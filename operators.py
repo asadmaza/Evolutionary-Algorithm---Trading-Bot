@@ -51,7 +51,7 @@ def __mutate_numeric_indicator_params(
 
     # Bitmask of which elements to mutate
     mutation_mask = np.random.random(size=len(params)) < ELEMENT_WISE_MUTATION_PROB
-    changes = [random.gauss(0, sigma) for _ in range(len(params))]
+    changes = np.array([random.gauss(0, sigma) for _ in range(len(params))])
 
     if dtype == "int":
         changes = np.rint(changes).astype(int)
@@ -59,7 +59,9 @@ def __mutate_numeric_indicator_params(
     params["value"][mutation_mask] += changes[mutation_mask]
 
     if dtype == "float":
-        params["arg"] = np.round(params["arg"], DECIMAL_PLACES)
+        params["value"] = np.round(params["value"], DECIMAL_PLACES)
+
+    params["value"] = np.clip(params["value"], 0, None)
 
 
 def __mutate_constants(chromosome: Chromosome):

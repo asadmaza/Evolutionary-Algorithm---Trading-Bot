@@ -156,8 +156,8 @@ class ChromosomeHandler:
     """Handles chromosome and DNF expression generation"""
 
     # Discourage long expressions, adjust as needed
-    DNF_PROBABILITY = 0.1
-    CONJ_PROBABILITY = 0.2
+    DNF_PROBABILITY = 0.3
+    CONJ_PROBABILITY = 0.1
     # Probability that indicator or candle value is chosen as value in DNF literal
     INDICATOR_PROBABILITY = 0.6
     CANDLE_VALUE_PROBABILITY = 0.3

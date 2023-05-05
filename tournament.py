@@ -2,7 +2,10 @@
 Run a tournament to find the best Strategy through evolution.
 """
 
+import pickle
 import random
+
+import ta
 from candle import get_candles_split
 from globals import timer_decorator
 from strategy import Strategy
@@ -14,7 +17,6 @@ import pandas as pd
 
 import os
 import sys
-import json
 
 script_path = os.path.abspath(sys.argv[0])
 script_dir = os.path.dirname(script_path)
@@ -28,7 +30,7 @@ class Tournament:
         size: int,
         num_parents: int,
         num_iterations: int,
-        mutation_probability: float = 0.1,
+        mutation_probability: float = 0.09,
         n_best_individuals: int = 3,
         chromosome_handler: ChromosomeHandler = None,
     ) -> None:
@@ -103,12 +105,10 @@ class Tournament:
             if random.uniform(0, 1) < mutation_prob:
                 if random.uniform(0, 1) < 0.5:
                     mutation(s.buy_chromosome)
-                    s.set_chromosome(s.buy_chromosome, "buy")
+                    s.set_chromosome(s.buy_chromosome, is_buy=True)
                 else:
                     mutation(s.sell_chromosome)
-                    s.set_chromosome(s.sell_chromosome, "sell")
-            s.evaluate()
-            s.fitness = self.fitness.get_fitness(s)
+                    s.set_chromosome(s.sell_chromosome, is_buy=False)
 
         new_pop.extend(best_individuals)  # Elitism
 
@@ -123,6 +123,7 @@ class Tournament:
 
         self.fitness.update_generation(self.strats)
         for s in self.strats:
+            s.fitness = s.evaluate()
             s.fitness = self.fitness.get_fitness(s)
 
         return self.best_strategies(self.n_best_individuals)
@@ -131,32 +132,46 @@ class Tournament:
         """Return the best n strategies in the current population."""
         return sorted(self.strats, key=lambda s: s.fitness, reverse=True)[:n]
 
-    def write_best(self, filename: str, n: int = 1) -> None:
+    def write_best_strategies(
+        self, filename: str = "results/best_strategies.pkl", n: int = 1
+    ) -> None:
         """
         Write the best n strategies in the current population to a json file.
         """
 
-        with open(filename, "w") as f:
-            json.dump([s.to_json() for s in self.best_strategies(n)], f, indent=2)
+        with open(filename, "wb") as f:
+            pickle.dump([s.get_pickle_data() for s in self.best_strategies(n)], f)
+
+    def load_strategies(
+        self, filename: str = "results/best_strategies.pkl"
+    ) -> list[Strategy]:
+        with open(filename, "rb") as f:
+            data = pickle.load(f)
+        strats = []
+        for d in data:
+            s = Strategy.load_pickle_data(self.candles, d)
+            strats.append(s)
+        return strats
 
 
 if __name__ == "__main__":
     """
     Testing
     """
-
     train_candles, test_candles = get_candles_split(0.8)
-
-    t = Tournament(train_candles, size=30, num_parents=20, num_iterations=150)
+    ch = ChromosomeHandler([ta.trend])
+    t = Tournament(
+        train_candles,
+        size=50,
+        num_parents=30,
+        num_iterations=100,
+        mutation_probability=0,
+    )
     t.play()
 
-    filename = "results/best_strategies.json"
+    filename = "results/best_strategies.pkl"
 
-    t.write_best(filename, 10)
-    strat = Strategy.from_json(train_candles, filename)[0]
-    strat.evaluate(graph=True)
-    print(strat)
-
-    strat = Strategy.from_json(test_candles, filename)[0]
+    t.write_best_strategies(filename, 10)
+    strat = t.load_strategies(filename)[0]
     strat.evaluate(graph=True)
     print(strat)

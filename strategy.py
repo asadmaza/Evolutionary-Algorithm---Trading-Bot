@@ -17,6 +17,8 @@ import numpy as np
 import json
 import uuid
 
+import ta
+
 from globals import *
 from chromosome import Chromosome, ChromosomeHandler
 
@@ -207,14 +209,15 @@ class Strategy:
             "portfolio": self.portfolio,
         }
 
-    def load_pickle_data(self, data: dict) -> None:
+    @classmethod
+    def load_pickle_data(cls, candles, data: dict) -> "Strategy":
         """
         Load the chromosomes, fitness, and portfolio from a pickle data dump (dict)
         """
-        self.set_chromosome(data["buy_chromosome"], is_buy=True)
-        self.set_chromosome(data["sell_chromosome"], is_buy=False)
-        self.fitness = data["fitness"]
-        self.portfolio = data["portfolio"]
+        s = cls(candles, data["buy_chromosome"], data["sell_chromosome"])
+        s.fitness = data["fitness"]
+        s.portfolio = data["portfolio"]
+        return s
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.get_pickle_data()}>"
@@ -231,22 +234,18 @@ if __name__ == "__main__":
 
     best_portfolio = 0
     # modules = [ta.trend, ta.momentum, ta.volatility, ta.volume, ta.others]
-    handler = ChromosomeHandler()
+    handler = ChromosomeHandler([ta.trend])
     # strat = Strategy.from_json(candles, "best_strategy.json", modules)[0]
     c = handler.generate_chromosome()
     strat = Strategy(candles, chromosome_handler=handler)
-    with open("best_strategy.pck", "rb") as f:
-        data = pickle.load(f)
-        strat.load_pickle_data(data)
-    strat.evaluate(True)
 
     while True:
         c = handler.generate_chromosome()
         strat = Strategy(candles, chromosome_handler=handler)
-        print(strat)
-        strat.evaluate(True)
         sleep(1)
         if strat.portfolio > best_portfolio:
+            print(strat)
+            strat.evaluate(True)
             best_portfolio = strat.portfolio
             print(f"New best portfolio: {best_portfolio:.2f}\n")
             with open("best_strategy.pck", "wb") as f:
