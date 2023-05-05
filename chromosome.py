@@ -32,11 +32,11 @@ class Chromosome:
         List of arrays, i-th array is name of candle params for i-th indicator
         e.g. [["close"], ["close", "open"]] for indicator0(close, ...), indicator1(close, open, ...)
     `int_params`: `list[np.array]`
-        List of np arrays, i-th array is int (argname:value) for i-th indicator
+        List of np arrays, i-th array is int (arg:value) for i-th indicator
         e.g. [np.array([('window_size', 1), ('b', 2), ('c', 3)], dtype=int_dtypes), ...]
                 for indicator0(window_size=1, b=2, c=3), indicator1(...)
     `float_params`: `list[np.array]`
-        List of np arrays, i-th array is int (argname:value) for i-th indicator
+        List of np arrays, i-th array is int (arg:value) for i-th indicator
     `constants`: `list[float]`
         List of constants used in the expression
     `expression_list`: `list`
@@ -156,7 +156,7 @@ class ChromosomeHandler:
     """Handles chromosome and DNF expression generation"""
 
     # Discourage long expressions, adjust as needed
-    DNF_PROBABILITY = 0.6
+    DNF_PROBABILITY = 0.1
     CONJ_PROBABILITY = 0.2
     # Probability that indicator or candle value is chosen as value in DNF literal
     INDICATOR_PROBABILITY = 0.6
@@ -289,7 +289,6 @@ class ChromosomeHandler:
                 val = param.default + random.uniform(-FLOAT_OFFSET, FLOAT_OFFSET)
                 float_params += [(param.name, round(max(val, 0.01), DECIMAL_PLACES))]
 
-        candle_params = np.array(candle_params, dtype="U6")
         int_params = np.array(int_params, dtype=self.INT_DTYPES)
         float_params = np.array(float_params, dtype=self.FLOAT_DTYPES)
 

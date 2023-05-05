@@ -14,6 +14,8 @@ INT_OFFSET: Final[int] = 10
 FLOAT_OFFSET: Final[int] = 3
 DECIMAL_PLACES: Final[int] = 3
 CONST_MAX: Final[int] = 5
+# WHen a mutation DOES occur, the probability that each element is altered
+ELEMENT_WISE_MUTATION_PROB: Final[float] = 0.1
 
 
 def timer_decorator(func):

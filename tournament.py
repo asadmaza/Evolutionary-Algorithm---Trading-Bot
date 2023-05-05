@@ -2,6 +2,7 @@
 Run a tournament to find the best Strategy through evolution.
 """
 
+import random
 from candle import get_candles_split
 from globals import timer_decorator
 from strategy import Strategy
@@ -60,7 +61,7 @@ class Tournament:
         self.n_best_individuals = n_best_individuals
         self.candles = candles
 
-        self.chromosome_handler = chromosome_handler or ChromosomeHandler(self.candles)
+        self.chromosome_handler = chromosome_handler or ChromosomeHandler()
 
         self.strats = [
             Strategy(candles, chromosome_handler=self.chromosome_handler)
@@ -74,34 +75,57 @@ class Tournament:
         """Complete self.num_iterations of the tournament."""
 
         self.fitness.update_generation(self.strats)
+
         for s in self.strats:
             s.fitness = self.fitness.get_fitness(s)
         best_individuals = self.best_strategies(self.n_best_individuals)
 
         for n_iter in range(self.num_iterations):
-            print(f"Iteration: {n_iter}")
-            new_pop = selection(self.strats, self.num_parents)
-            new_pop = crossover(new_pop)
-            for s in new_pop:
-                mutation(
-                    s,
-                    self.mutation_probability
-                    * ((self.num_iterations - n_iter) / self.num_iterations),
-                )
-            new_pop.extend(best_individuals)  # Elitism
-
-            n_migrants = self.size - len(new_pop)
-            new_pop.extend([Strategy(self.candles) for _ in range(n_migrants)])
-            self.strats = new_pop
-
-            self.fitness.update_generation(self.strats)
-            for s in self.strats:
-                s.fitness = self.fitness.get_fitness(s)
-
-            best_individuals = self.best_strategies(self.n_best_individuals)
+            self.run_iteration(n_iter, best_individuals)
 
         self.fitness.generate_average_graph()
         self.fitness.generate_average_graph(type="portfolio")
+
+    @timer_decorator
+    def run_iteration(
+        self, n_iter: int, best_individuals: list[Strategy]
+    ) -> list[Strategy]:
+        """Run a single iteration of the tournament."""
+
+        print(f"Iteration: {n_iter}")
+        new_pop = selection(self.strats, self.num_parents)
+        new_pop = crossover(new_pop)
+        for s in new_pop:
+            # Adaptive mutation probability
+            mutation_prob = self.mutation_probability * (
+                (self.num_iterations - n_iter) / self.num_iterations
+            )
+            if random.uniform(0, 1) < mutation_prob:
+                if random.uniform(0, 1) < 0.5:
+                    mutation(s.buy_chromosome)
+                    s.set_chromosome(s.buy_chromosome, "buy")
+                else:
+                    mutation(s.sell_chromosome)
+                    s.set_chromosome(s.sell_chromosome, "sell")
+            s.evaluate()
+            s.fitness = self.fitness.get_fitness(s)
+
+        new_pop.extend(best_individuals)  # Elitism
+
+        n_migrants = self.size - len(new_pop)
+        new_pop.extend(
+            [
+                Strategy(self.candles, chromosome_handler=self.chromosome_handler)
+                for _ in range(n_migrants)
+            ]
+        )
+        self.strats = new_pop
+
+        self.fitness.update_generation(self.strats)
+        for s in self.strats:
+            s.fitness = self.fitness.get_fitness(s)
+
+        return self.best_strategies(self.n_best_individuals)
 
     def best_strategies(self, n: int = 1) -> list[Strategy]:
         """Return the best n strategies in the current population."""
