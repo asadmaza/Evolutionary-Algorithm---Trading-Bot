@@ -210,8 +210,8 @@ class Strategy:
         """
         Load the chromosomes, fitness, and portfolio from a pickle data dump (dict)
         """
-        self.set_chromosome(data["buy_chromosome"])
-        self.set_chromosome(data["sell_chromosome"])
+        self.set_chromosome(data["buy_chromosome"], is_buy=True)
+        self.set_chromosome(data["sell_chromosome"], is_buy=False)
         self.fitness = data["fitness"]
         self.portfolio = data["portfolio"]
 
@@ -232,6 +232,13 @@ if __name__ == "__main__":
     # modules = [ta.trend, ta.momentum, ta.volatility, ta.volume, ta.others]
     handler = ChromosomeHandler()
     # strat = Strategy.from_json(candles, "best_strategy.json", modules)[0]
+    c = handler.generate_chromosome()
+    strat = Strategy(candles, chromosome_handler=handler)
+    with open("best_strategy.pck", "rb") as f:
+        data = pickle.load(f)
+        strat.load_pickle_data(data)
+    strat.evaluate(True)
+    """
     while True:
         c = handler.generate_chromosome()
         strat = Strategy(candles, chromosome_handler=handler)
@@ -242,3 +249,4 @@ if __name__ == "__main__":
             strat.evaluate(True)
             with open("best_strategy.pck", "wb") as f:
                 pickle.dump(strat.get_pickle_data(), f)
+    """
