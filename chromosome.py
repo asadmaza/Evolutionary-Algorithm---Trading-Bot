@@ -61,10 +61,10 @@ class Chromosome:
     B = "B"
     C = "C"
 
-    # Change below to match signature in Strategy class
-    A_NAME = "self.indicators"
-    B_NAME = "self.candles[self.chromosome['candle_names']"
-    C_NAME = "self.chromosome['constants']"
+    # Change below to match signature in Strategy class, see __replace_value_symbols() also
+    A_NAME = "indicators"
+    B_NAME = "chromosome.candle_names"
+    C_NAME = "chromosome.constants"
 
     @property
     def expression_str(self) -> str:
@@ -78,13 +78,31 @@ class Chromosome:
 
     @expression_list.setter
     def expression_list(self, value: list):
+        # IF self.int_params and self.float_params != n_As
+        # if len self.candle_params != n_Bs
+        #
+        n_A, n_B, n_C = (
+            str(value).count(self.A),
+            str(value).count(self.B),
+            str(value).count(self.C),
+        )
         if (
-            len(value) != len(self.int_params)
-            or len(value) != len(self.float_params)
-            or len(value) != len(self.candle_params)
+            n_A != len(self.int_params)
+            or n_A != len(self.float_params)
+            or n_A != len(self.candle_params)
         ):
             raise ValueError(
-                "Length of expression_list must match length of int_params, float_params, and candle_params"
+                "Mismatch between number of A symbols and number of indicators"
+                " or sets of indicator parameters"
+            )
+        if n_B != len(self.candle_names):
+            raise ValueError(
+                "Mismatch between number of B symbols and number of candle "
+                "value names"
+            )
+        if n_C != len(self.constants):
+            raise ValueError(
+                "Mismatch between number of C symbols and number of constants"
             )
         self._expression_list = value
         self._expression_str = self.to_str()
@@ -144,7 +162,22 @@ class Chromosome:
         return expr
 
     def __repr__(self) -> str:
-        pass
+        delim = f"\n{'-' * 50}\n"
+        indicator_str = ""
+        for i in range(len(self.indicators)):
+            indicator, _ = self.indicators[i]
+            indicator_str += f"  {indicator}\n  | Parameters:\n"
+            for params in self.int_params[i]:
+                indicator_str += f"  | | {params[0]} = {params[1]}\n"
+            indicator_str += "\n"
+        return (
+            f"DNF expression (symbolic):\n\t{self.expression_str}{delim}"
+            f"DNF expression (non-symbolic):\n\t{self.to_str_non_symbolic()}{delim}"
+            f"Constants (symbol {self.C}):\n\t{[c for c in self.constants]}{delim}"
+            f"Candle OHLCV values (symbol {self.B}):\n\t{[c for c in self.candle_names]}{delim}"
+            f"Indicators (symbol {self.A}):\n{indicator_str}\n"
+            f"(NOTE: candle value params are omitted from indicator parameter listings)\n"
+        )
 
     def __replace_value_symbols(self, m: re.Match, counters: dict) -> str:
         """Replace value symbols with actual values"""
@@ -153,11 +186,11 @@ class Chromosome:
         counters[value] += 1
         match value:
             case self.A:
-                return self.A_NAME + f"[{index}][t]"
+                return f"self.{self.A_NAME}[{index}][t]"
             case self.B:
-                return self.B_NAME + f"[{index}][t]"
+                return f"self.candles[self.{self.B_NAME}[{index}]][t]"
             case self.C:
-                return self.C_NAME + f"[{index}]"
+                return f"self.{self.C_NAME}[{index}]"
             case _:
                 raise ValueError(f"Invalid value symbol {value}")
 
@@ -170,9 +203,7 @@ class ChromosomeHandler:
     CONJ_PROBABILITY = 0.2
     # Probability that indicator or candle value is chosen as value in DNF literal
     INDICATOR_PROBABILITY = 0.6
-    CANDLE_VALUE_PROBABILITY = (
-        INDICATOR_PROBABILITY + 0.3
-    )  # 30%, ignore the INDICATOR_PROBABILITY part
+    CANDLE_VALUE_PROBABILITY = 0.3
 
     # Data types for numpy structured arrays
     INT_DTYPES = [("arg", "U20"), ("value", np.int8)]
@@ -203,9 +234,15 @@ class ChromosomeHandler:
                 ]
             )
 
-    def generate_chromosome(self) -> Chromosome:
+    def generate_chromosome(self, is_buy: bool = True) -> Chromosome:
         """Generate a random chromosome object representing a DNF expression."""
         c = Chromosome()
+        prefix = "sell_"
+        if is_buy:
+            prefix = "buy_"
+        c.A_NAME = f"{prefix}{c.A_NAME}"
+        c.B_NAME = f"{prefix}{c.B_NAME}"
+        c.C_NAME = f"{prefix}{c.C_NAME}"
 
         c.expression_list = self.__gen_dnf(c)
         c.constants = np.array(c.constants, dtype=np.float16)
@@ -258,8 +295,8 @@ class ChromosomeHandler:
             return chromosome.A
 
         # Add candle name to chromosome
-        elif rand_num < self.CANDLE_VALUE_PROBABILITY:
-            chromosome.candle_names += random.choice(self.candle_names)
+        elif rand_num < self.INDICATOR_PROBABILITY + self.CANDLE_VALUE_PROBABILITY:
+            chromosome.candle_names += [random.choice(self.candle_names)]
             return chromosome.B
 
         return self.__gen_constant(chromosome)
@@ -327,8 +364,5 @@ if __name__ == "__main__":
     candles = get_candles()
     handler = ChromosomeHandler([ta.momentum, ta.volatility, ta.volume, ta.trend])
 
-    c = handler.generate_chromosome()
-    print()
-    print(c.expression_str)
-    print(c.expression_list)
-    print(c.to_str_non_symbolic())
+    c = handler.generate_chromosome(is_buy=False)
+    print(c)

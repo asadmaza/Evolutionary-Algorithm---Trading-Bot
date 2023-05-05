@@ -7,6 +7,7 @@ Ideas:
 - Could have separate indicators with separate params for buy and sell triggers.
 """
 
+import pickle
 import types
 from typing import Any
 import pandas as pd
@@ -16,7 +17,7 @@ import json
 import uuid
 
 from globals import *
-from dnf import Chromosome, ChromosomeHandler
+from chromosome import Chromosome, ChromosomeHandler
 
 
 class Strategy:
@@ -45,14 +46,21 @@ class Strategy:
         self.id = uuid.uuid4()
         self.close_prices = []
 
-        if buy_chromosome is None and sell_chromosome is None and chromosome_handler is None:
-            raise ValueError("Must provide either chromosomes or chromosome_handler")
+        if (
+            buy_chromosome is None or sell_chromosome is None
+        ) and chromosome_handler is None:
+            raise ValueError(
+                "If buy and or sell chromosome is not provided, a chromosome"
+                " handler must be provided to generate the missing chromosome(s)"
+            )
 
         self.set_chromosome(
-            buy_chromosome or chromosome_handler.generate_chromosome(), is_buy=True
+            buy_chromosome or chromosome_handler.generate_chromosome(is_buy=True),
+            is_buy=True,
         )
         self.set_chromosome(
-            sell_chromosome or chromosome_handler.generate_chromosome(), is_buy=False
+            sell_chromosome or chromosome_handler.generate_chromosome(is_buy=False),
+            is_buy=False,
         )
 
         self.portfolio = self.evaluate()  # evaluate fitness once on init
@@ -60,28 +68,34 @@ class Strategy:
 
     def set_chromosome(self, c: Chromosome, is_buy: bool) -> None:
         """Given a chromosome, set all indicators and triggers"""
+        indicators = []
+        # Create reference to right attribtue name
         if is_buy:
             self.buy_chromosome = c
+            self.buy_indicators = indicators
         else:
             self.sell_chromosome = c
-            
-        self.n_indicators = len(c.indicators)
-        self.indicators = []
+            self.sell_indicators = indicators
+
         # For each indicator, provide respective params and generate DataFrame features
         # Buy and sell triggers call self.indicators, hence we need to generate them
-        for i in range(self.n_indicators):
+        for i in range(len(c.indicators)):
             params = {}
             # Candle params is a list of olhcv names, replace them with actual Series data
-            for candle_name in chromosome["candle_params"][i]:
+            for candle_name in c.candle_params[i]:
                 params[candle_name] = self.candles[candle_name]
             # Convert (arg, value) tuples to dict pairs
-            for param in [chromosome["int_params"][i], chromosome["float_params"][i]]:
+            for param in [c.int_params[i], c.float_params[i]]:
                 params.update({entry["arg"]: entry["value"] for entry in param})
 
-            self.indicators.append(chromosome["indicators"][i][1](**params))
+            # Call this indicator and append its features to buy_indicators or sell_indicators
+            indicators.append(c.indicators[i][1](**params))
 
-        self.buy_trigger = types.MethodType(chromosome["functions"][0], self)
-        self.sell_trigger = types.MethodType(chromosome["functions"][1], self)
+        # Bind the function of chromosome to self - so it acts like a class method
+        if is_buy:
+            self.buy_trigger = types.MethodType(c.to_function(), self)
+        else:
+            self.sell_trigger = types.MethodType(c.to_function(), self)
 
     def evaluate(self, graph: bool = False) -> float:
         """
@@ -98,10 +112,15 @@ class Strategy:
 
         if graph:
             plt.plot(self.close, label="Close price")
-            for i in range(self.n_indicators):
+            for i in range(len(self.buy_chromosome.indicators)):
                 plt.plot(
-                    self.indicators[i],
-                    label=self.chromosome["indicators"][i][0],
+                    self.buy_indicators[i],
+                    label=self.buy_chromosome.indicators[i][0],
+                )
+            for i in range(len(self.sell_chromosome.indicators)):
+                plt.plot(
+                    self.sell_indicators[i],
+                    label=self.sell_chromosome.indicators[i][0],
                 )
 
         quote = 100  # AUD
@@ -176,62 +195,28 @@ class Strategy:
         self.portfolio = quote
         return quote
 
-    def to_json(self) -> dict:
+    def get_pickle_data(self) -> dict:
         """
-        Return a dict of the minimum data needed to represent this strategy, as well as the fitness.
+        Return a dict of chromosomes, fitness and portfolio for pickle dumping
         """
-
         return {
-            "indicators": [i[0] for i in self.chromosome["indicators"]],
-            "candle_names": self.chromosome["candle_names"],
-            "candle_params": [i.tolist() for i in self.chromosome["candle_params"]],
-            "int_params": [i.tolist() for i in self.chromosome["int_params"]],
-            "float_params": [i.tolist() for i in self.chromosome["float_params"]],
-            "constants": self.chromosome["constants"].tolist(),
-            "expressions": self.chromosome["expressions"],
+            "buy_chromosome": self.buy_chromosome,
+            "sell_chromosome": self.sell_chromosome,
             "fitness": self.fitness,
             "portfolio": self.portfolio,
         }
 
-    @classmethod
-    def from_json(
-        self, candles: pd.DataFrame, filename: str, modules: list, n: int = 1
-    ) -> list["Strategy"]:
+    def load_pickle_data(self, data: dict) -> None:
         """
-        Return a list of n Strategy objects from json file data.
+        Load the chromosomes, fitness, and portfolio from a pickle data dump (dict)
         """
-
-        with open(filename, "r", encoding="UTF-8") as f:
-            data = json.load(f)
-            strategies = []
-            for i in range(len(data)):
-                indicators = []
-                for name in data[i]["indicators"]:
-                    for m in modules:
-                        try:
-                            indocators += [name, getattr(m, name)]
-                        except e:
-                            continue
-
-                chromosome = {
-                    "indicators": indicators,
-                    "candle_names": data[i]["candle_names"],
-                    "candle_params": np.array(data[i]["candle_params"]),
-                    "int_params": np.array(data[i]["int_params"]),
-                    "float_params": np.array(data[i]["float_params"]),
-                    "constants": np.array(data[i]["constants"]),
-                    "expressions": data[i]["expressions"],
-                }
-                for e in chromosome["expressions"]:
-                    e["function"] = ChromosomeHandler.dnf_list_to_function(e)
-
-                self.set_chromosome(candles, data[i]["chromosome"])
-                strategies.append(Strategy(candles, data[i]))
-
-            return strategies
+        self.set_chromosome(data["buy_chromosome"])
+        self.set_chromosome(data["sell_chromosome"])
+        self.fitness = data["fitness"]
+        self.portfolio = data["portfolio"]
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} {self.to_json()}>"
+        return f"<{self.__class__.__name__} {self.get_pickle_data()}>"
 
 
 if __name__ == "__main__":
@@ -249,11 +234,11 @@ if __name__ == "__main__":
     # strat = Strategy.from_json(candles, "best_strategy.json", modules)[0]
     while True:
         c = handler.generate_chromosome()
-        strat = Strategy(candles, c)
+        strat = Strategy(candles, chromosome_handler=handler)
         if strat.portfolio > best_portfolio:
             best_portfolio = strat.portfolio
             print(f"New best portfolio: {best_portfolio:.2f}\n")
             print(strat)
             strat.evaluate(True)
-            with open("best_strategy.json", "w", encoding="UTF-8") as f:
-                json.dump(strat.to_json(), f)
+            with open("best_strategy.pck", "wb") as f:
+                pickle.dump(strat.get_pickle_data(), f)
