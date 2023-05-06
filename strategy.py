@@ -196,10 +196,7 @@ class Strategy:
 
         if graph:
             plt.legend(prop={"size": 6})
-            plt.title(
-                f"Trading behaviour of best strategy, fitness = "
-                f"{self.fitness:.2f}, portfolio = {self.portfolio:.2f}"
-            )
+            plt.title(f"Trading behaviour of best strategy, portfolio = {quote:.2f}")
             plt.savefig(figname, dpi=200)
             plt.clf()
             plt.cla()
