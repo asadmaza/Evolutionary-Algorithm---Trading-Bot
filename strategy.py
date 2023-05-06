@@ -191,7 +191,7 @@ class Strategy:
 
         if graph:
             plt.legend(prop={"size": 6})
-            plt.savefig("graph.png", dpi=100)
+            plt.savefig("graph.png", dpi=200)
             plt.clf()
             plt.cla()
 

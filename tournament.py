@@ -4,6 +4,7 @@ Run a tournament to find the best Strategy through evolution.
 
 import pickle
 import random
+import math
 
 import ta
 from candle import get_candles_split
@@ -84,6 +85,8 @@ class Tournament:
 
         for n_iter in range(self.num_iterations):
             self.run_iteration(n_iter, best_individuals)
+            if n_iter % 10 == 0:
+                self.write_best_strategies()
 
         self.fitness.generate_average_graph()
         self.fitness.generate_average_graph(type="portfolio")
@@ -162,9 +165,9 @@ if __name__ == "__main__":
     ch = ChromosomeHandler([ta.trend])
     t = Tournament(
         train_candles,
-        size=50,
-        num_parents=30,
-        num_iterations=100,
+        size=200,
+        num_parents=150,
+        num_iterations=1000,
         mutation_probability=0,
     )
     t.play()
