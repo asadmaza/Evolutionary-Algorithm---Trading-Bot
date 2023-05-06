@@ -60,8 +60,9 @@ def __mutate_numeric_indicator_params(
 
     if dtype == "float":
         params["value"] = np.round(params["value"], DECIMAL_PLACES)
-
-    params["value"] = np.clip(params["value"], 0, None)
+        params["value"] = np.clip(params["value"], 0, None)
+    else:
+        params["value"] = np.clip(params["value"], 1, None)
 
 
 def __mutate_constants(chromosome: Chromosome):
@@ -90,10 +91,15 @@ def crossover(parents: list["Strategy"]) -> list["Strategy"]:
         child_buy1, child_buy2 = __expression_crossover(
             p1.buy_chromosome, p2.buy_chromosome
         )
+
+        ch = ChromosomeHandler()
+        child_sell1 = ch.generate_symmetric_chromosome(child_buy1, is_buy=False)
+        child_sell2 = ch.generate_symmetric_chromosome(child_buy2, is_buy=False)
+        """
         child_sell1, child_sell2 = __expression_crossover(
             p1.sell_chromosome, p2.sell_chromosome
         )
-
+        """
         offspring.append(Strategy(p1.candles, child_buy1, child_sell1))
         offspring.append(Strategy(p1.candles, child_buy2, child_sell2))
     return offspring

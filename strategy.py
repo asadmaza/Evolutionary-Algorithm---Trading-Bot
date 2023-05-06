@@ -62,12 +62,15 @@ class Strategy:
             is_buy=True,
         )
         self.set_chromosome(
-            sell_chromosome or chromosome_handler.generate_chromosome(is_buy=False),
+            sell_chromosome
+            or chromosome_handler.generate_symmetric_chromosome(
+                self.buy_chromosome, is_buy=False
+            ),
             is_buy=False,
         )
 
-        self.portfolio = self.evaluate()  # evaluate fitness once on init
         self.fitness = None
+        self.portfolio = self.evaluate()  # evaluate fitness once on init
 
     def set_chromosome(self, c: Chromosome, is_buy: bool) -> None:
         """Given a chromosome, set all indicators and triggers"""
@@ -233,16 +236,13 @@ if __name__ == "__main__":
     candles = get_candles()
 
     best_portfolio = 0
-    # modules = [ta.trend, ta.momentum, ta.volatility, ta.volume, ta.others]
-    handler = ChromosomeHandler([ta.trend])
-    # strat = Strategy.from_json(candles, "best_strategy.json", modules)[0]
-    c = handler.generate_chromosome()
+    modules = [ta.momentum]
+    handler = ChromosomeHandler(modules)
     strat = Strategy(candles, chromosome_handler=handler)
 
     while True:
-        c = handler.generate_chromosome()
         strat = Strategy(candles, chromosome_handler=handler)
-        sleep(1)
+
         if strat.portfolio > best_portfolio:
             print(strat)
             strat.evaluate(True)

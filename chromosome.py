@@ -191,19 +191,37 @@ class ChromosomeHandler:
                 ]
             )
 
-    def generate_chromosome(self, is_buy: bool = True) -> Chromosome:
+    def generate_chromosome(self, is_buy) -> Chromosome:
         """Generate a random chromosome object representing a DNF expression."""
         c = Chromosome()
-        prefix = "sell_"
-        if is_buy:
-            prefix = "buy_"
-        c.A_NAME = f"{prefix}{c.A_NAME}"
-        c.B_NAME = f"{prefix}{c.B_NAME}"
-        c.C_NAME = f"{prefix}{c.C_NAME}"
-
+        self.__attach_buy_sell_prefix(c, is_buy)
         c.expression_list = self.__gen_dnf(c)
         c.constants = np.array(c.constants, dtype=np.float16)
         return c
+
+    def generate_symmetric_chromosome(
+        self, chromosome: Chromosome, is_buy: bool = True
+    ) -> Chromosome:
+        chromosome = copy.deepcopy(chromosome)
+
+        # Remove existing prefix
+        if chromosome.A_NAME.startswith("buy_"):
+            chromosome.A_NAME = chromosome.A_NAME[4:]
+            chromosome.B_NAME = chromosome.B_NAME[4:]
+            chromosome.C_NAME = chromosome.C_NAME[4:]
+        elif chromosome.A_NAME.startswith("sell_"):
+            chromosome.A_NAME = chromosome.A_NAME[5:]
+            chromosome.B_NAME = chromosome.B_NAME[5:]
+            chromosome.C_NAME = chromosome.C_NAME[5:]
+
+        self.__attach_buy_sell_prefix(chromosome, is_buy)
+
+        for i in range(len(chromosome.expression_list)):
+            conj = chromosome.expression_list[i]
+            for j in range(len(conj)):
+                lit = conj[j]
+                lit[-1], lit[-3] = lit[-3], lit[-1]
+        return chromosome
 
     # ==================== DNF EXPRESSION ====================
 
@@ -312,6 +330,16 @@ class ChromosomeHandler:
                 print(e)
                 print(param_lst)
 
+    # ==================== MISC ====================
+    def __attach_buy_sell_prefix(self, c: Chromosome, is_buy: bool) -> Chromosome:
+        prefix = "sell_"
+        if is_buy:
+            prefix = "buy_"
+        c.A_NAME = f"{prefix}{c.A_NAME}"
+        c.B_NAME = f"{prefix}{c.B_NAME}"
+        c.C_NAME = f"{prefix}{c.C_NAME}"
+        return c
+
 
 if __name__ == "__main__":
     """Example usage"""
@@ -321,4 +349,5 @@ if __name__ == "__main__":
     handler = ChromosomeHandler([ta.momentum, ta.volatility, ta.volume, ta.trend])
 
     c = handler.generate_chromosome(is_buy=False)
+
     print(c)

@@ -84,7 +84,7 @@ class Tournament:
         best_individuals = self.best_strategies(self.n_best_individuals)
 
         for n_iter in range(self.num_iterations):
-            self.run_iteration(n_iter, best_individuals)
+            best_individuals = self.run_iteration(n_iter, best_individuals)
             if n_iter % 10 == 0:
                 self.write_best_strategies()
 
@@ -100,18 +100,21 @@ class Tournament:
         print(f"Iteration: {n_iter}")
         new_pop = selection(self.strats, self.num_parents)
         new_pop = crossover(new_pop)
+
         for s in new_pop:
             # Adaptive mutation probability
             mutation_prob = self.mutation_probability * (
                 (self.num_iterations - n_iter) / self.num_iterations
             )
             if random.uniform(0, 1) < mutation_prob:
-                if random.uniform(0, 1) < 0.5:
-                    mutation(s.buy_chromosome)
-                    s.set_chromosome(s.buy_chromosome, is_buy=True)
-                else:
-                    mutation(s.sell_chromosome)
-                    s.set_chromosome(s.sell_chromosome, is_buy=False)
+                mutation(s.buy_chromosome)
+                s.set_chromosome(s.buy_chromosome, is_buy=True)
+                s.set_chromosome(
+                    self.chromosome_handler.generate_symmetric_chromosome(
+                        s.buy_chromosome
+                    ),
+                    is_buy=False,
+                )
 
         new_pop.extend(best_individuals)  # Elitism
 
@@ -126,7 +129,6 @@ class Tournament:
 
         self.fitness.update_generation(self.strats)
         for s in self.strats:
-            s.fitness = s.evaluate()
             s.fitness = self.fitness.get_fitness(s)
 
         return self.best_strategies(self.n_best_individuals)
@@ -146,13 +148,18 @@ class Tournament:
             pickle.dump([s.get_pickle_data() for s in self.best_strategies(n)], f)
 
     def load_strategies(
-        self, filename: str = "results/best_strategies.pkl"
+        self,
+        filename: str = "results/best_strategies.pkl",
+        candles: pd.DataFrame = None,
     ) -> list[Strategy]:
+        if candles is None:
+            candles = self.candles
+
         with open(filename, "rb") as f:
             data = pickle.load(f)
         strats = []
         for d in data:
-            s = Strategy.load_pickle_data(self.candles, d)
+            s = Strategy.load_pickle_data(candles, d)
             strats.append(s)
         return strats
 
@@ -162,19 +169,25 @@ if __name__ == "__main__":
     Testing
     """
     train_candles, test_candles = get_candles_split(0.8)
-    ch = ChromosomeHandler([ta.trend])
+    modules = [ta.momentum]
+    ch = ChromosomeHandler(modules)
     t = Tournament(
         train_candles,
         size=200,
-        num_parents=150,
-        num_iterations=1000,
-        mutation_probability=0,
+        num_parents=170,
+        num_iterations=10,
+        mutation_probability=0.1,
     )
     t.play()
 
     filename = "results/best_strategies.pkl"
 
     t.write_best_strategies(filename, 10)
-    strat = t.load_strategies(filename)[0]
+    strat = t.load_strategies(filename, train_candles)[0]
     strat.evaluate(graph=True)
+    print(strat)
+
+    strat = t.load_strategies(filename, test_candles)[0]
+    strat.evaluate(graph=True)
+
     print(strat)
