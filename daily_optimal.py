@@ -35,12 +35,10 @@ if __name__ == "__main__":
   Testing
   """
 
-  from candle import get_candles
-
-  train_candles, test_candles = get_candles_split(0.2)
+  train_candles, test_candles = get_candles_split(1)
 
   o = Optimal(train_candles)
-  portfolio = o.evaluate(False)
+  portfolio = o.evaluate(True)
   f = Fitness(batches=4)
-  o.update_fitness(f.get_fitness(o))
+  o.fitness = f.get_fitness(o)
   print(portfolio)

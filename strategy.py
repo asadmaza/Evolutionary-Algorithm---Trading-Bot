@@ -30,6 +30,7 @@ class Strategy:
       buy_chromosome: Chromosome = None,
       sell_chromosome: Chromosome = None,
       chromosome_handler: ChromosomeHandler = None,
+      fitness: int = None,
       market="BTC/AUD",
   ) -> None:
     """
@@ -230,6 +231,7 @@ class Strategy:
 
   def __repr__(self) -> str:
     return f"<{self.__class__.__name__} {self.get_pickle_data()}>"
+
 
 
 if __name__ == "__main__":

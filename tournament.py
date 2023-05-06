@@ -71,7 +71,7 @@ class Tournament:
         for _ in range(self.size)
     ]
 
-    self.fitness = Fitness(self.strats, batches=4)
+    self.fitness = Fitness(self.strats, batches=1)
 
   @timer_decorator
   def play(self) -> None:
@@ -130,8 +130,8 @@ class Tournament:
     self.fitness.update_generation(self.strats)
     for s in self.strats:
       s.fitness = self.fitness.get_fitness(s)
-
     return self.best_strategies(self.n_best_individuals)
+
 
   def best_strategies(self, n: int = 1) -> list[Strategy]:
     """Return the best n strategies in the current population."""
@@ -185,6 +185,7 @@ if __name__ == "__main__":
   t.write_best_strategies(filename, 10)
   strat = t.load_strategies(filename, train_candles)[0]
   strat.evaluate(graph=True, figname="results/training_result.png")
+
   print(strat)
 
   strat = t.load_strategies(filename, test_candles)[0]
