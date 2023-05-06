@@ -55,12 +55,14 @@ class Chromosome:
     constants: np.ndarray[np.float16] = field(default_factory=list)
     expression_list: list = field(default_factory=list)
 
-    # DISPLAY ONLY - symbolic names used instead of function names for brevity
+    # Symbolic representation of indicator, candle_values, and constants
+    # Used in the list representation
     A = "A"
     B = "B"
     C = "C"
 
-    # Change below to match signature in Strategy class, see __replace_value_symbols() also
+    # Change below to match signature in Strategy class
+    # see __replace_value_symbols() also
     A_NAME = "indicators"
     B_NAME = "chromosome.candle_names"
     C_NAME = "chromosome.constants"
@@ -87,6 +89,7 @@ class Chromosome:
         return dnf
 
     def to_function(self) -> Callable:
+        """Generate function from DNF expression to embed in Strategy class"""
         expr = self.to_str_non_symbolic()
 
         func_signature = f"""def dnf_func(self, t):
@@ -137,7 +140,10 @@ class Chromosome:
         )
 
     def __replace_value_symbols(self, m: re.Match, counters: dict) -> str:
-        """Replace value symbols with actual values"""
+        """Replace value symbols with actual values
+
+        Actual values are python expressions that are evaluated at runtime
+        """
         value = m.group(0)
         index = counters[value]
         counters[value] += 1
@@ -158,11 +164,13 @@ class ChromosomeHandler:
     # Discourage long expressions, adjust as needed
     DNF_PROBABILITY = 0.3
     CONJ_PROBABILITY = 0.1
+
     # Probability that indicator or candle value is chosen as value in DNF literal
+    # Sum of both cannot exceed 1 (though this is not checked)
     INDICATOR_PROBABILITY = 0.6
     CANDLE_VALUE_PROBABILITY = 0.3
 
-    # Data types for numpy structured arrays
+    # Data types for numpy structured arrays for int and float parameters
     INT_DTYPES = [("arg", "U20"), ("value", np.int8)]
     FLOAT_DTYPES = [("arg", "U20"), ("value", np.float16)]
 
@@ -177,10 +185,10 @@ class ChromosomeHandler:
         ],
         candle_names: list[str] = ["close"],
     ):
-        """Discover indicators in modules and bind self to specific candle values."""
-        self.candle_names = candle_names
-
+        """Discover indicators in modules and candle names to use in DNF expression generation"""
+        self.candle_names = candle_names  # List of candle names to choose from
         self.__indicator_lst = []  # List of indicator functions to choose from
+
         for module in modules:
             # Ignore 'adx' cause of "invalid value encountered in scalar divide" warning
             self.__indicator_lst.extend(
@@ -202,6 +210,12 @@ class ChromosomeHandler:
     def generate_symmetric_chromosome(
         self, chromosome: Chromosome, is_buy: bool = True
     ) -> Chromosome:
+        """Replace literals in form "A > C * B" to "B > C * A" in given chromosome
+
+        This is used to generate the complimentary buy/sell chromosome as having
+        distinct buy and sell chromosomes drastically reduce the likelihood of
+        buy and sell. Symmetric chromosomes reduce this degree of freedon.
+        """
         chromosome = copy.deepcopy(chromosome)
 
         # Remove existing prefix
@@ -216,11 +230,14 @@ class ChromosomeHandler:
 
         self.__attach_buy_sell_prefix(chromosome, is_buy)
 
+        # Swap A and B in literals
         for i in range(len(chromosome.expression_list)):
             conj = chromosome.expression_list[i]
             for j in range(len(conj)):
+                # negative indices are used to acocunt for negated literals
                 lit = conj[j]
                 lit[-1], lit[-3] = lit[-3], lit[-1]
+
         return chromosome
 
     # ==================== DNF EXPRESSION ====================
@@ -274,6 +291,7 @@ class ChromosomeHandler:
             chromosome.candle_names += [random.choice(self.candle_names)]
             return chromosome.B
 
+        # Add constant to chromosome
         return self.__gen_constant(chromosome)
 
     def __gen_constant(self, chromosome: dict) -> float:
@@ -300,9 +318,11 @@ class ChromosomeHandler:
             # param for candles have no default value, save candle name
             if param.default == inspect._empty:
                 candle_params += [param.name]
+
             elif isinstance(param.default, int) and not isinstance(param.default, bool):
                 val = param.default + random.randint(-INT_OFFSET, INT_OFFSET)
                 int_params += [(param.name, max(val, 1))]
+
             elif isinstance(param.default, float):
                 val = param.default + random.uniform(-FLOAT_OFFSET, FLOAT_OFFSET)
                 float_params += [(param.name, round(max(val, 0.01), DECIMAL_PLACES))]
@@ -332,6 +352,7 @@ class ChromosomeHandler:
 
     # ==================== MISC ====================
     def __attach_buy_sell_prefix(self, c: Chromosome, is_buy: bool) -> Chromosome:
+        """Strategy have two chromosomes identified by buy_ and sell_ prefix"""
         prefix = "sell_"
         if is_buy:
             prefix = "buy_"

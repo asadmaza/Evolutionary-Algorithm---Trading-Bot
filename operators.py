@@ -15,9 +15,13 @@ from chromosome import Chromosome, ChromosomeHandler
 
 
 def mutation(chromosome: Chromosome) -> None:
-    """ """
-    # Go through each param list, and mutate each value with probability `prob`
+    """Randomly select a mutation to apply to the given chromosome.
+
+    Mutations include: shuffle constants, mutate numeric indicator params, and
+    mutate constants
+    """
     p = random.uniform(0, 1)
+
     if p < 1 / 4:
         __shuffle_constants(chromosome)
     elif p < 2 / 4:
@@ -36,7 +40,11 @@ def __shuffle_constants(c: Chromosome):
 def __mutate_numeric_indicator_params(
     chromosome: Chromosome, dtype: Literal["int", "float"]
 ) -> None:
-    """Mutate a single numeric param list for an indicator with probability `prob` using Gaussian distribution"""
+    """Mutate a single numeric param list for an indicator
+
+    Each number in the list will be mutated with probability 'prob'. Mutation
+    involves adding a number from Gaussian distribution to that number.
+    """
     if dtype == "float" and len(chromosome.float_params) > 0:
         params = random.choice(chromosome.float_params)
         sigma = FLOAT_GAUSSIAN_SIGMA
@@ -53,11 +61,13 @@ def __mutate_numeric_indicator_params(
     mutation_mask = np.random.random(size=len(params)) < ELEMENT_WISE_MUTATION_PROB
     changes = np.array([random.gauss(0, sigma) for _ in range(len(params))])
 
+    # Round to nearest integer if necessary
     if dtype == "int":
         changes = np.rint(changes).astype(int)
 
     params["value"][mutation_mask] += changes[mutation_mask]
 
+    # Clip values to be above 0 for floats, and above 1 for ints
     if dtype == "float":
         params["value"] = np.round(params["value"], DECIMAL_PLACES)
         params["value"] = np.clip(params["value"], 0, None)
@@ -82,11 +92,16 @@ def __mutate_constants(chromosome: Chromosome):
 def crossover(parents: list["Strategy"]) -> list["Strategy"]:
     """Given a list of Strategies to mate, return a list of offspring of same size
 
-    Crossover is done by taking the average of the parameters of the parents.
+    One-point crossover is used to generate the offspring. Crosspoint is chosen
+    for each pair of parents randomly, and the DNF expressions are swapped
+    at that point to produce two children.
+
+    NOTE: Only the buy chromosome is crossed over. The sell chromosome is
+          generated as the symmetric of the buy chromosome.
     """
     offspring = []
     while len(offspring) < len(parents):
-        p1, p2 = random.choices(parents, k=2)
+        p1, p2 = np.random.choice(parents, size=2)
 
         child_buy1, child_buy2 = __expression_crossover(
             p1.buy_chromosome, p2.buy_chromosome
@@ -95,11 +110,7 @@ def crossover(parents: list["Strategy"]) -> list["Strategy"]:
         ch = ChromosomeHandler()
         child_sell1 = ch.generate_symmetric_chromosome(child_buy1, is_buy=False)
         child_sell2 = ch.generate_symmetric_chromosome(child_buy2, is_buy=False)
-        """
-        child_sell1, child_sell2 = __expression_crossover(
-            p1.sell_chromosome, p2.sell_chromosome
-        )
-        """
+
         offspring.append(Strategy(p1.candles, child_buy1, child_sell1))
         offspring.append(Strategy(p1.candles, child_buy2, child_sell2))
     return offspring

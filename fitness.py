@@ -21,6 +21,7 @@ class Fitness:
 
         self.fitness = {}
         self.portfolio = {}
+        self.rf = 0.012 / 365
 
         self.single = not len(strats)
 
@@ -45,9 +46,7 @@ class Fitness:
         s.close_prices = s.close_prices[start:end]
         s.close = s.close[start:end]
 
-        # fitness = self.get_sortino_raw(strat) + self.get_sharpe_raw(strat) + 0.01*self.get_ROI_fitness_normalised(strat)
-
-        fitness = self.get_sortino_raw(strat)
+        fitness = self.get_sortino_raw(s)
 
         return fitness
 
@@ -78,16 +77,7 @@ class Fitness:
         return strat.portfolio
 
     def get_sharpe_raw(self, strat):
-        daily_returns = []
-        self.rf = 0.012 / 365
-
-        for i in range(1, len(strat.close_prices)):
-            daily_return = (strat.close_prices[i] - strat.close_prices[i - 1]) / (
-                strat.close_prices[i - 1]
-            )
-            daily_returns.append(daily_return)
-
-        avg_daily_return = sum(daily_returns) / len(daily_returns)
+        daily_returns, avg_daily_return = self.get_daily_and_avg_returns(strat)
 
         std_dev_daily_return = statistics.stdev(daily_returns)
 
@@ -99,18 +89,9 @@ class Fitness:
         return sharpe_ratio
 
     def get_sortino_raw(self, strat):
-        daily_returns = []
-        self.rf = 0.012 / 365
+        daily_returns, avg_daily_return = self.get_daily_and_avg_returns(strat)
+
         target_return = 0
-
-        for i in range(1, len(strat.close_prices)):
-            daily_return = (strat.close_prices[i] - strat.close_prices[i - 1]) / (
-                strat.close_prices[i - 1]
-            )
-            daily_returns.append(daily_return)
-
-        avg_daily_return = sum(daily_returns) / len(daily_returns)
-
         downside_deviation = 0
         for return_value in daily_returns:
             if return_value < target_return:
@@ -152,6 +133,17 @@ class Fitness:
         plt.xticks(range(1, len(generations) + 1), map(str, generations))
 
         plt.show()
+
+    def get_daily_and_avg_returns(self, strat):
+        daily_returns = []
+        for i in range(1, len(strat.close_prices)):
+            daily_return = (strat.close_prices[i] - strat.close_prices[i - 1]) / (
+                strat.close_prices[i - 1]
+            )
+            daily_returns.append(daily_return)
+
+        avg_daily_return = sum(daily_returns) / len(daily_returns)
+        return daily_returns, avg_daily_return
 
 
 candles = get_candles()
