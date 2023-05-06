@@ -132,7 +132,6 @@ class Tournament:
       s.fitness = self.fitness.get_fitness(s)
     return self.best_strategies(self.n_best_individuals)
 
-
   def best_strategies(self, n: int = 1) -> list[Strategy]:
     """Return the best n strategies in the current population."""
     return sorted(self.strats, key=lambda s: s.fitness, reverse=True)[:n]

@@ -233,7 +233,6 @@ class Strategy:
     return f"<{self.__class__.__name__} {self.get_pickle_data()}>"
 
 
-
 if __name__ == "__main__":
   """
   Testing
