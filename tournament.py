@@ -169,13 +169,13 @@ if __name__ == "__main__":
     Testing
     """
     train_candles, test_candles = get_candles_split(0.8)
-    modules = [ta.momentum]
+    modules = [ta.momentum, ta.trend, ta.volatility, ta.volume, ta.others]
     ch = ChromosomeHandler(modules)
     t = Tournament(
         train_candles,
         size=100,
         num_parents=70,
-        num_iterations=5,
+        num_iterations=50,
         mutation_probability=0.3,
     )
     t.play()
