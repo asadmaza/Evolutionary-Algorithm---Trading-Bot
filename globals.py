@@ -19,15 +19,15 @@ ELEMENT_WISE_MUTATION_PROB: Final[float] = 0.1
 
 
 def timer_decorator(func):
-    """Decorator to time function execution"""
+  """Decorator to time function execution"""
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        elapsed_time = end_time - start_time
-        print(f"Execution time of {func.__name__}: {elapsed_time} seconds")
-        return result
+  @wraps(func)
+  def wrapper(*args, **kwargs):
+    start_time = time.perf_counter()
+    result = func(*args, **kwargs)
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"Execution time of {func.__name__}: {elapsed_time} seconds")
+    return result
 
-    return wrapper
+  return wrapper
