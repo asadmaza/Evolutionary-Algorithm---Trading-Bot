@@ -22,13 +22,13 @@ def mutation(chromosome: Chromosome) -> None:
     """
     p = random.uniform(0, 1)
 
-    if p < 1 / 4:
+    if p < 1 / 4 and len(chromosome.constants) > 0:
         __shuffle_constants(chromosome)
-    elif p < 2 / 4:
+    elif p < 2 / 4 and len(chromosome.int_params) > 0:
         __mutate_numeric_indicator_params(chromosome, "int")
-    elif p < 3 / 4:
+    elif p < 3 / 4 and len(chromosome.float_params) > 0:
         __mutate_numeric_indicator_params(chromosome, "float")
-    else:
+    elif len(chromosome.constants) > 0:
         __mutate_constants(chromosome)
 
 
@@ -45,14 +45,21 @@ def __mutate_numeric_indicator_params(
     Each number in the list will be mutated with probability 'prob'. Mutation
     involves adding a number from Gaussian distribution to that number.
     """
-    if dtype == "float" and len(chromosome.float_params) > 0:
-        params = random.choice(chromosome.float_params)
+
+    if dtype == "float":
+        all_params = chromosome.float_params
         sigma = FLOAT_GAUSSIAN_SIGMA
-    elif dtype == "int" and len(chromosome.int_params) > 0:
-        params = random.choice(chromosome.int_params)
+    elif dtype == "int":
+        all_params = chromosome.int_params
         sigma = INT_GAUSSIAN_SIGMA
     else:
+        raise ValueError("dtype must be 'int' or 'float'")
+
+    non_empty_params = [lst for lst in all_params if len(lst) > 0]
+    if len(non_empty_params) == 0:
         return
+
+    params = random.choice(non_empty_params)
 
     if len(params) == 0:
         return

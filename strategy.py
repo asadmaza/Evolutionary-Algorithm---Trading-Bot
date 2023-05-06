@@ -103,7 +103,9 @@ class Strategy:
         else:
             self.sell_trigger = types.MethodType(c.to_function(), self)
 
-    def evaluate(self, graph: bool = False) -> float:
+    def evaluate(
+        self, graph: bool = False, figname: str = "best_strategy.png"
+    ) -> float:
         """
         Return the fitness of the Strategy, which is defined as the quote currency remaining after:
         - starting with 1 unit of quote currency,
@@ -194,7 +196,11 @@ class Strategy:
 
         if graph:
             plt.legend(prop={"size": 6})
-            plt.savefig("graph.png", dpi=200)
+            plt.title(
+                f"Trading behaviour of best strategy, fitness = "
+                f"{self.fitness:.2f}, portfolio = {self.portfolio:.2f}"
+            )
+            plt.savefig(figname, dpi=200)
             plt.clf()
             plt.cla()
 

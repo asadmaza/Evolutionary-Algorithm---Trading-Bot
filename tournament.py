@@ -101,11 +101,11 @@ class Tournament:
         new_pop = selection(self.strats, self.num_parents)
         new_pop = crossover(new_pop)
 
+        # Adaptive mutation probability
+        mutation_prob = self.mutation_probability * (
+            (self.num_iterations - n_iter) / self.num_iterations
+        )
         for s in new_pop:
-            # Adaptive mutation probability
-            mutation_prob = self.mutation_probability * (
-                (self.num_iterations - n_iter) / self.num_iterations
-            )
             if random.uniform(0, 1) < mutation_prob:
                 mutation(s.buy_chromosome)
                 s.set_chromosome(s.buy_chromosome, is_buy=True)
@@ -169,13 +169,13 @@ if __name__ == "__main__":
     Testing
     """
     train_candles, test_candles = get_candles_split(0.8)
-    modules = [ta.momentum, ta.volume, ta.trend, ta.volatility, ta.others]
+    modules = [ta.momentum]
     ch = ChromosomeHandler(modules)
     t = Tournament(
         train_candles,
         size=100,
         num_parents=70,
-        num_iterations=50,
+        num_iterations=5,
         mutation_probability=0.3,
     )
     t.play()
@@ -184,10 +184,9 @@ if __name__ == "__main__":
 
     t.write_best_strategies(filename, 10)
     strat = t.load_strategies(filename, train_candles)[0]
-    strat.evaluate(graph=True)
+    strat.evaluate(graph=True, figname="results/training_result.png")
     print(strat)
 
     strat = t.load_strategies(filename, test_candles)[0]
-    strat.evaluate(graph=True)
-
+    strat.evaluate(graph=True, figname="results/testing_result.png")
     print(strat)
