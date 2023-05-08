@@ -47,12 +47,13 @@ class Fitness:
 
     # fitness = self.get_sortino_raw(strat) + self.get_sharpe_raw(strat) + 0.01*(self.get_ROI_raw(strat)-100)
 
-    # fitness = self.get_sortino_raw(strat)
+    fitness = self.get_sortino_raw(strat)
     # fitness = self.get_sharpe_raw(strat)
 
     # fitness = self.get_ROI_raw(strat)
 
-    fitness = self.get_sterling_ratio(strat)
+    # fitness = self.get_sterling_ratio(strat)
+
 
     return fitness
 
@@ -183,6 +184,7 @@ class Fitness:
   def get_sortino_raw(self, strat):
     daily_returns = []
     self.rf = 0.012 / 365
+    # self.rf = 0
     target_return = 0
 
     for i in range(1, len(strat.close_prices)):
@@ -193,6 +195,9 @@ class Fitness:
 
     avg_daily_return = sum(daily_returns) / len(daily_returns)
 
+    if avg_daily_return == 0:
+      return -1
+
     downside_deviation = 0
     for return_value in daily_returns:
       if return_value < target_return:
@@ -201,14 +206,15 @@ class Fitness:
     downside_deviation = math.sqrt(downside_deviation / len(daily_returns))
 
     sortino_ratio = 0
+    if downside_deviation == 0: 
+      downside_deviation = 0.001
 
-    if not downside_deviation == 0:
-      sortino_ratio = (avg_daily_return - self.rf) / downside_deviation
+    sortino_ratio = (avg_daily_return - self.rf) / downside_deviation
 
     return sortino_ratio
 
   def generate_generation_graph(
-      self, generation=-1, type: Literal["fitness", "porfolio"] = "fitness"
+      self, generation=-1, type: Literal["fitness", "portfolio"] = "fitness"
   ):
     data = self.fitness
     if type == "portfolio":
@@ -216,12 +222,13 @@ class Fitness:
 
     if generation == -1:
       generation = self.generation
-    data[generation] = sorted(data[generation])
-    plt.plot(data[generation])
+    y = sorted(data[generation])
+
+    plt.plot(y)
     plt.show()
 
   def generate_average_graph(
-          self, type: Literal["fitness", "porfolio"] = "fitness"):
+          self, type: Literal["fitness", "portfolio"] = "fitness", last_n = 0):
     data = self.fitness
     if type == "portfolio":
       data = self.portfolio
@@ -229,7 +236,11 @@ class Fitness:
     averages = []
     generations = []
     for g in range(1, self.generation + 1):
-      averages.append(np.average(data[g]))
+      y = data[g]
+      if (last_n):
+        y = y[-last_n:]
+
+      averages.append(np.average(y))
       generations.append(g)
     plt.plot(generations, averages, marker="o")
     plt.xticks(range(1, len(generations) + 1), map(str, generations))

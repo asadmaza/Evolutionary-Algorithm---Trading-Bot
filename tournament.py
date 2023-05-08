@@ -96,6 +96,7 @@ class Tournament:
     self.fitness.generate_average_graph()
     self.fitness.generate_average_graph(type="portfolio")
     self.fitness.generate_generation_graph()
+    self.fitness.generate_generation_graph(type="portfolio")
 
   def best_strategies(self, n: int = 1) -> list[Strategy]:
     """Return the best n strategies in the current population."""
