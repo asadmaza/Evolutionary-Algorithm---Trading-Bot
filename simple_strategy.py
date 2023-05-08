@@ -2,7 +2,7 @@ from strategy import Strategy
 import ta
 
 class SimpleStrategy(Strategy):
-  def __init__(self, candles, window=40): # buy or sell roughly once every 20 days
+  def __init__(self, candles, window=20): # buy or sell roughly once every 20 days
     close = candles.iloc[:, 4]  # 5th column is close price
 
     self.sma = ta.trend.sma_indicator(close, window)
