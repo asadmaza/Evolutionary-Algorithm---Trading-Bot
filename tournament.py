@@ -55,7 +55,7 @@ class Tournament:
         """
 
         self.size = size
-        self.num_parents = num_parents * size
+        self.num_parents = int(num_parents * size)
         self.num_iterations = num_iterations
         self.mutation_probability = mutation_probability
         self.n_best_individuals = n_best_individuals
