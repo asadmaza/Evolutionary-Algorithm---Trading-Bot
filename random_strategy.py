@@ -2,7 +2,7 @@ from strategy import Strategy
 import random
 
 class RandomStrategy(Strategy):
-  def __init__(self, candles, prob=1/20): # buy or sell roughly once every 20 days
+  def __init__(self, candles, prob=0.05): # buy or sell roughly once every 20 days
     self.prob = prob
     super(RandomStrategy, self).__init__(candles)
   
