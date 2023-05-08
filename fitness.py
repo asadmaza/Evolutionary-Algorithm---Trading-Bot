@@ -85,9 +85,10 @@ class Fitness:
     std_dev_daily_return = statistics.stdev(daily_returns)
 
     sharpe_ratio = 0
-    
-    if std_dev_daily_return == 0: std_dev_daily_return = 0.001
-    
+
+    if std_dev_daily_return == 0:
+      std_dev_daily_return = 0.001
+
     sharpe_ratio = (avg_daily_return - self.rf) / std_dev_daily_return
 
     return sharpe_ratio
@@ -108,8 +109,9 @@ class Fitness:
 
     sortino_ratio = 0
 
-    if downside_deviation == 0: downside_deviation = 0.001
-    
+    if downside_deviation == 0:
+      downside_deviation = 0.001
+
     sortino_ratio = (avg_daily_return - self.rf) / downside_deviation
 
     return sortino_ratio

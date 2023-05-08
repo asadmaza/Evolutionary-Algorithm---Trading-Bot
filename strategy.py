@@ -57,8 +57,6 @@ class Strategy:
           "If buy and or sell chromosome is not provided, a chromosome"
           " handler must be provided to generate the missing chromosome(s)"
       )
-    
-
 
     self.set_chromosome(
         buy_chromosome or chromosome_handler.generate_chromosome(is_buy=True),
