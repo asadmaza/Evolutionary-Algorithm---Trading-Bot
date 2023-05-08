@@ -79,17 +79,24 @@ class Fitness:
   def get_sharpe_raw(self, strat):
     daily_returns, avg_daily_return = self.get_daily_and_avg_returns(strat)
 
+    if avg_daily_return == 0:
+      return -1
+
     std_dev_daily_return = statistics.stdev(daily_returns)
 
     sharpe_ratio = 0
-
-    if not std_dev_daily_return == 0:
-      sharpe_ratio = (avg_daily_return - self.rf) / std_dev_daily_return
+    
+    if std_dev_daily_return == 0: std_dev_daily_return = 0.001
+    
+    sharpe_ratio = (avg_daily_return - self.rf) / std_dev_daily_return
 
     return sharpe_ratio
 
   def get_sortino_raw(self, strat):
     daily_returns, avg_daily_return = self.get_daily_and_avg_returns(strat)
+
+    if avg_daily_return == 0:
+      return -1
 
     target_return = 0
     downside_deviation = 0
@@ -101,8 +108,9 @@ class Fitness:
 
     sortino_ratio = 0
 
-    if not downside_deviation == 0:
-      sortino_ratio = (avg_daily_return - self.rf) / downside_deviation
+    if downside_deviation == 0: downside_deviation = 0.001
+    
+    sortino_ratio = (avg_daily_return - self.rf) / downside_deviation
 
     return sortino_ratio
 

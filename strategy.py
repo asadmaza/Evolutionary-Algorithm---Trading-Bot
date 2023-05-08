@@ -57,6 +57,8 @@ class Strategy:
           "If buy and or sell chromosome is not provided, a chromosome"
           " handler must be provided to generate the missing chromosome(s)"
       )
+    
+
 
     self.set_chromosome(
         buy_chromosome or chromosome_handler.generate_chromosome(is_buy=True),
@@ -124,16 +126,16 @@ class Strategy:
 
     if graph:
       plt.plot(self.close, label="Close price")
-      for i in range(len(self.buy_chromosome.indicators)):
-        plt.plot(
-            self.buy_indicators[i],
-            label=self.buy_chromosome.indicators[i][0],
-        )
-      for i in range(len(self.sell_chromosome.indicators)):
-        plt.plot(
-            self.sell_indicators[i],
-            label=self.sell_chromosome.indicators[i][0],
-        )
+      # for i in range(len(self.buy_chromosome.indicators)):
+      #   plt.plot(
+      #       self.buy_indicators[i],
+      #       label=self.buy_chromosome.indicators[i][0],
+      #   )
+      # for i in range(len(self.sell_chromosome.indicators)):
+      #   plt.plot(
+      #       self.sell_indicators[i],
+      #       label=self.sell_chromosome.indicators[i][0],
+      #   )
 
     quote = 100  # AUD
     base = 0  # BTC
