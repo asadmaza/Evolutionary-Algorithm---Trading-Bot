@@ -170,7 +170,7 @@ if __name__ == "__main__":
     ch = ChromosomeHandler(modules)
 
     for i in range(10):
-        filename = "results/best_strategies_tournament{i}.pkl"
+        filename = f"results/best_strategies_tournament{i}.pkl"
 
         # CHANGE THESE SETTINGS
         t = Tournament(
@@ -183,5 +183,3 @@ if __name__ == "__main__":
         t.play()
 
         t.write_best_strategies(filename, 10)
-        strat = t.load_strategies(filename, train_candles)[0]
-        print(strat)

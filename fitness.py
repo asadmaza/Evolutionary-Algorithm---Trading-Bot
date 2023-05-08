@@ -47,6 +47,7 @@ class Fitness:
     s.close = s.close[start:end]
 
     fitness = self.get_sortino_raw(s)
+    # fitness = self.get_ROI_raw(s)
 
     return fitness
 
