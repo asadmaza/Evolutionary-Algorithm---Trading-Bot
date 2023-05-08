@@ -58,7 +58,7 @@ class Tournament:
       raise ValueError("num_parents must be <= size")
 
     self.size = size
-    self.num_parents = num_parents
+    self.num_parents = size * 0.7
     self.num_iterations = num_iterations
     self.mutation_probability = mutation_probability
     self.n_best_individuals = n_best_individuals
