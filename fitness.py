@@ -75,6 +75,9 @@ class Fitness:
       return self.roi_quotes[strat.id]
 
   def get_ROI_raw(self, strat):
+    if self.portfolio == 100:
+      return -1
+
     return strat.portfolio
 
   def get_sharpe_raw(self, strat):
