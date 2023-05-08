@@ -54,7 +54,6 @@ class Fitness:
 
     # fitness = self.get_sterling_ratio(strat)
 
-
     return fitness
 
   def update_values(self, fitness, portfolio):
@@ -206,7 +205,7 @@ class Fitness:
     downside_deviation = math.sqrt(downside_deviation / len(daily_returns))
 
     sortino_ratio = 0
-    if downside_deviation == 0: 
+    if downside_deviation == 0:
       downside_deviation = 0.001
 
     sortino_ratio = (avg_daily_return - self.rf) / downside_deviation
@@ -228,7 +227,7 @@ class Fitness:
     plt.show()
 
   def generate_average_graph(
-          self, type: Literal["fitness", "portfolio"] = "fitness", last_n = 0):
+          self, type: Literal["fitness", "portfolio"] = "fitness", last_n=0):
     data = self.fitness
     if type == "portfolio":
       data = self.portfolio
