@@ -34,9 +34,11 @@ if __name__ == "__main__":
           with open(f'results/{n}/best_strategies_tournament{i}.pkl', "rb") as f:
             data = pickle.load(f)
 
-          best_fitness = sorted([Strategy.load_pickle_data(candles, d) for d in data], key=lambda s: fit.get_fitness(s))[-1]
-          best_portfolio = sorted([Strategy.load_pickle_data(candles, d) for d in data], key=lambda s: s.portfolio)[-1]
-          
+          best_fitness = sorted([Strategy.load_pickle_data(
+              candles, d) for d in data], key=lambda s: fit.get_fitness(s))[-1]
+          best_portfolio = sorted([Strategy.load_pickle_data(
+              candles, d) for d in data], key=lambda s: s.portfolio)[-1]
+
           portfolios.append(best_portfolio.portfolio)
           sortinos.append(fit.get_fitness(best_fitness))
 

@@ -22,6 +22,7 @@ import ta
 from globals import *
 from chromosome import Chromosome, ChromosomeHandler
 
+
 class Strategy:
   def __init__(
       self,
