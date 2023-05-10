@@ -162,7 +162,8 @@ if __name__ == "__main__":
   """
   Testing
   """
-  import sys, os
+  import sys
+  import os
 
   train_candles, test_candles = get_candles_split(0.8)
   modules = [ta.momentum, ta.trend]
@@ -178,8 +179,10 @@ if __name__ == "__main__":
   else:
     size, num_parents, num_iterations, mutation_probability, dir = 100, 0.7, 100, 0.3, 'tournament'
 
-  try: os.mkdir(f'results/{dir}')
-  except: pass
+  try:
+    os.mkdir(f'results/{dir}')
+  except BaseException:
+    pass
 
   for i in range(10):
     filename = f"results/{dir}/best_strategies_tournament{i}.pkl"
