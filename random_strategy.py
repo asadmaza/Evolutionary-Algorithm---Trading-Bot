@@ -18,4 +18,3 @@ if __name__ == '__main__':
   from candle import get_candles_split, get_candles
   candles = get_candles()
   print(max(RandomStrategy(candles).portfolio for _ in range(1000)))
-  

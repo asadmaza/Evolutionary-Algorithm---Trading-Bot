@@ -60,9 +60,8 @@ class Strategy:
       # )
     else:
       self.set_chromosome(
-          buy_chromosome or chromosome_handler.generate_chromosome(is_buy=True),
-          is_buy=True,
-      )
+          buy_chromosome or chromosome_handler.generate_chromosome(
+              is_buy=True), is_buy=True, )
       self.set_chromosome(
           sell_chromosome
           or chromosome_handler.generate_symmetric_chromosome(
