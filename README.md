@@ -1,10 +1,13 @@
 # Evolutionary-Trading-Bot
 
+Steps to reproduce results:
+
 Clone repo and cd to project directory.  
-Create a virtual environment and download packages.
+Create and activate a virtual environment and download packages.
 
 ```console
 python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
