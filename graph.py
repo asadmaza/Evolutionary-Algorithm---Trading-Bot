@@ -38,9 +38,9 @@ if __name__ == '__main__':
       graph=True,
       fname='graphs/best_portfolio.png',
       title='Best strategy portfolio')
-  
+
   print(f'{best.portfolio:.4f}')
-  
+
   # sortino
   best = None
   for i in range(10):
