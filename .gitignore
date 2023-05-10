@@ -4,5 +4,4 @@
 **/myenv
 **/__pycache__
 
-**.csv
-./results
+candles.csv

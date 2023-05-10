@@ -15,7 +15,7 @@ class RandomStrategy(Strategy):
 
 
 if __name__ == '__main__':
-  from candle import get_candles
+  from candle import get_candles_split, get_candles
   candles = get_candles()
-  r = RandomStrategy(candles)
-  r.evaluate(graph=True)
+  print(max(RandomStrategy(candles).portfolio for _ in range(1000)))
+  

@@ -53,22 +53,23 @@ class Strategy:
     if (
         buy_chromosome is None or sell_chromosome is None
     ) and chromosome_handler is None:
-      raise ValueError(
-          "If buy and or sell chromosome is not provided, a chromosome"
-          " handler must be provided to generate the missing chromosome(s)"
+      pass
+      # raise ValueError(
+      #     "If buy and or sell chromosome is not provided, a chromosome"
+      #     " handler must be provided to generate the missing chromosome(s)"
+      # )
+    else:
+      self.set_chromosome(
+          buy_chromosome or chromosome_handler.generate_chromosome(is_buy=True),
+          is_buy=True,
       )
-
-    self.set_chromosome(
-        buy_chromosome or chromosome_handler.generate_chromosome(is_buy=True),
-        is_buy=True,
-    )
-    self.set_chromosome(
-        sell_chromosome
-        or chromosome_handler.generate_symmetric_chromosome(
-            self.buy_chromosome, is_buy=False
-        ),
-        is_buy=False,
-    )
+      self.set_chromosome(
+          sell_chromosome
+          or chromosome_handler.generate_symmetric_chromosome(
+              self.buy_chromosome, is_buy=False
+          ),
+          is_buy=False,
+      )
 
     self.fitness = None
     self.portfolio = self.evaluate()  # evaluate fitness once on init
@@ -241,6 +242,16 @@ if __name__ == "__main__":
   from candle import get_candles
 
   candles = get_candles()
+
+  # sortinos = []
+  # portfolios = []
+  # for n in ["sortino50", "sortino100", "portfolio50"]:
+  #   for i in range(10):
+  #     with open(f'results/{n}/best_strategies_tournament{i}.pkl', "rb") as f:
+  #       data = pickle.load(f)
+  #     portfolios.append(max([Strategy.load_pickle_data(candles, d).portfolio for d in data]))
+  #     sortinos.append(max([Strategy.load_pickle_data(candles, d).fitness for d in data]))
+  #   print(n, sum(sortinos) / len(sortinos), sum(portfolios) / len(portfolios))
 
   best_portfolio = 0
   modules = [ta.momentum]

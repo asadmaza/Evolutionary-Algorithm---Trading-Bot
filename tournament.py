@@ -173,7 +173,7 @@ if __name__ == "__main__":
     # CHANGE THESE SETTINGS
     t = Tournament(
         train_candles,
-        size=100,
+        size=50,
         num_parents=0.7,
         num_iterations=100,
         mutation_probability=0.3,
