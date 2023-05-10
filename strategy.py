@@ -22,7 +22,6 @@ import ta
 from globals import *
 from chromosome import Chromosome, ChromosomeHandler
 
-
 class Strategy:
   def __init__(
       self,
@@ -225,7 +224,7 @@ class Strategy:
     Load the chromosomes, fitness, and portfolio from a pickle data dump (dict)
     """
     s = cls(candles, data["buy_chromosome"], data["sell_chromosome"])
-    # s.fitness = data["fitness"]
+    # s.fitness = Fitness.get_fitness(s)
     s.portfolio = s.evaluate()
     return s
 

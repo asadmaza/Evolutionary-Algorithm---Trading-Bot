@@ -14,6 +14,8 @@ if __name__ == "__main__":
 
   candles = test_candles
 
+  fit = Fitness()
+
   for avg in [True, False]:
     for train in [True, False]:
       candles = train_candles if train else test_candles
@@ -32,10 +34,11 @@ if __name__ == "__main__":
           with open(f'results/{n}/best_strategies_tournament{i}.pkl', "rb") as f:
             data = pickle.load(f)
 
-          portfolios.append(
-              max([Strategy.load_pickle_data(candles, d).evaluate() for d in data]))
-          sortinos.append(max([Fitness().get_fitness(
-              Strategy.load_pickle_data(candles, d)) for d in data]))
+          best_fitness = sorted([Strategy.load_pickle_data(candles, d) for d in data], key=lambda s: fit.get_fitness(s))[-1]
+          best_portfolio = sorted([Strategy.load_pickle_data(candles, d) for d in data], key=lambda s: s.portfolio)[-1]
+          
+          portfolios.append(best_portfolio.portfolio)
+          sortinos.append(fit.get_fitness(best_fitness))
 
         with open(f'results/{"train" if train else "test"}_data_{"avg" if avg else "best"}.csv', 'a') as f:
           if avg:
