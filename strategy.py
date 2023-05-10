@@ -107,8 +107,10 @@ class Strategy:
       self.sell_trigger = types.MethodType(c.to_function(), self)
 
   def evaluate(
-      self, graph: bool = False, fname: str = "strategy.png", title: str = "Best strategy"
-  ) -> float:
+          self,
+          graph: bool = False,
+          fname: str = "strategy.png",
+          title: str = "Best strategy") -> float:
     """
     Return the fitness of the Strategy, which is defined as the quote currency remaining after:
     - starting with 1 unit of quote currency,
