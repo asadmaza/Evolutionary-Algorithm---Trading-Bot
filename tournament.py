@@ -162,21 +162,34 @@ if __name__ == "__main__":
   """
   Testing
   """
+  import sys, os
+
   train_candles, test_candles = get_candles_split(0.8)
   modules = [ta.momentum, ta.trend]
 
   ch = ChromosomeHandler(modules)
 
-  for i in range(10):
-    filename = f"results/best_strategies_tournament{i}.pkl"
+  if len(sys.argv) > 1:
+    size = int(sys.argv[1])
+    num_parents = float(sys.argv[2])
+    num_iterations = int(sys.argv[3])
+    mutation_probability = float(sys.argv[4])
+    dir = sys.argv[5]
+  else:
+    size, num_parents, num_iterations, mutation_probability, dir = 100, 0.7, 100, 0.3, 'tournament'
 
-    # CHANGE THESE SETTINGS
+  try: os.mkdir(f'results/{dir}')
+  except: pass
+
+  for i in range(10):
+    filename = f"results/{dir}/best_strategies_tournament{i}.pkl"
+
     t = Tournament(
         train_candles,
-        size=50,
-        num_parents=0.7,
-        num_iterations=100,
-        mutation_probability=0.3,
+        size=size,
+        num_parents=num_parents,
+        num_iterations=num_iterations,
+        mutation_probability=mutation_probability,
     )
     t.play()
 

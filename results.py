@@ -26,7 +26,7 @@ if __name__ == "__main__":
           "sortino200",
           "portfolio50",
           "portfolio100",
-              "portfolio200"]:
+          "portfolio200"]:
         sortinos = []
         portfolios = []
 
