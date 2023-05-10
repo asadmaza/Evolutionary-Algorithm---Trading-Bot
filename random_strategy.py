@@ -19,5 +19,5 @@ if __name__ == '__main__':
   _, candles = get_candles_split()
   # print(max(RandomStrategy(candles).portfolio for _ in range(1000)))
   r = RandomStrategy(candles)
-  r.evaluate(graph=True, fname='graphs/random.png', title='Random strategy, test data')
-  
+  r.evaluate(graph=True, fname='graphs/random.png',
+             title='Random strategy, test data')

@@ -39,4 +39,5 @@ if __name__ == '__main__':
 
   print(Fitness().get_fitness(s))
   print(s.portfolio)
-  s.evaluate(graph=True, fname='graphs/simple.png', title='Simple strategy, test data')
+  s.evaluate(graph=True, fname='graphs/simple.png',
+             title='Simple strategy, test data')
