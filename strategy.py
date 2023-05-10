@@ -109,7 +109,7 @@ class Strategy:
       self.sell_trigger = types.MethodType(c.to_function(), self)
 
   def evaluate(
-      self, graph: bool = False, figname: str = "best_strategy.png"
+      self, graph: bool = False, fname: str = "strategy.png", title: str = "Best strategy"
   ) -> float:
     """
     Return the fitness of the Strategy, which is defined as the quote currency remaining after:
@@ -201,8 +201,8 @@ class Strategy:
 
     if graph:
       plt.legend(prop={"size": 6})
-      plt.title(f"Trading behaviour of best strategy, portfolio = {quote:.2f}")
-      plt.savefig(figname, dpi=200)
+      plt.title(f"{title}, portfolio = {quote:.2f}")
+      plt.savefig(fname, dpi=200)
       plt.clf()
       plt.cla()
 
@@ -226,8 +226,8 @@ class Strategy:
     Load the chromosomes, fitness, and portfolio from a pickle data dump (dict)
     """
     s = cls(candles, data["buy_chromosome"], data["sell_chromosome"])
-    s.fitness = data["fitness"]
-    s.portfolio = data["portfolio"]
+    # s.fitness = data["fitness"]
+    s.portfolio = s.evaluate()
     return s
 
   def __repr__(self) -> str:
