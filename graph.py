@@ -39,7 +39,7 @@ if __name__ == '__main__':
       fname='graphs/best_portfolio.png',
       title='Best strategy portfolio')
 
-  print(f'{best.portfolio:.4f}')
+  print(f'{best.portfolio:.4f}, {best.buy_chromosome} {best.sell_chromosome}')
 
   # sortino
   best = None
