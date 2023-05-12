@@ -8,8 +8,8 @@ class SimpleStrategy(Strategy):
 
     self.close = candles.iloc[:, 4]  # 5th column is close price
 
-    self.sma = ta.trend.sma_indicator(self.close, 20)
-    self.ema = ta.trend.ema_indicator(self.close, 20)
+    self.sma = ta.trend.sma_indicator(self.close, 30)
+    self.ema = ta.trend.ema_indicator(self.close, 30)
 
     super(SimpleStrategy, self).__init__(candles)
 

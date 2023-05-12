@@ -1,14 +1,14 @@
 DNF expression (symbolic):
-        (B > C * A) ∧ ¬(B > C * A)
+	(B > C * A) ∧ ¬(B > C * A)
 --------------------------------------------------
 DNF expression (non-symbolic):
-        (self.candles[self.buy_chromosome.candle_names[0]][t] > self.buy_chromosome.constants[0] * self.buy_indicators[0][t])  and  not (self.candles[self.buy_chromosome.candle_names[1]][t] > self.buy_chromosome.constants[1] * self.buy_indicators[1][t])
+	(self.candles[self.buy_chromosome.candle_names[0]][t] > self.buy_chromosome.constants[0] * self.buy_indicators[0][t])  and  not (self.candles[self.buy_chromosome.candle_names[1]][t] > self.buy_chromosome.constants[1] * self.buy_indicators[1][t])
 --------------------------------------------------
 Constants (symbol C):
-        [0.46, 0.46]
+	[0.46, 0.46]
 --------------------------------------------------
 Candle OHLCV values (symbol B):
-        ['close', 'close']
+	['close', 'close']
 --------------------------------------------------
 Indicators (symbol A):
   force_index
@@ -23,17 +23,17 @@ Indicators (symbol A):
 
 (NOTE: candle value params are omitted from indicator parameter listings)
 
- DNF expression (symbolic):
-        (A > C * B) ∧ ¬(A > C * B)
+DNF expression (symbolic):
+	(A > C * B) ∧ ¬(A > C * B)
 --------------------------------------------------
 DNF expression (non-symbolic):
-        (self.sell_indicators[0][t] > self.sell_chromosome.constants[0] * self.candles[self.sell_chromosome.candle_names[0]][t])  and  not (self.sell_indicators[1][t] > self.sell_chromosome.constants[1] * self.candles[self.sell_chromosome.candle_names[1]][t])
+	(self.sell_indicators[0][t] > self.sell_chromosome.constants[0] * self.candles[self.sell_chromosome.candle_names[0]][t])  and  not (self.sell_indicators[1][t] > self.sell_chromosome.constants[1] * self.candles[self.sell_chromosome.candle_names[1]][t])
 --------------------------------------------------
 Constants (symbol C):
-        [0.46, 0.46]
+	[0.46, 0.46]
 --------------------------------------------------
 Candle OHLCV values (symbol B):
-        ['close', 'close']
+	['close', 'close']
 --------------------------------------------------
 Indicators (symbol A):
   force_index
