@@ -13,8 +13,10 @@ BEST_SORTINO = 'results/sortino200/best_strategies_tournament{}.pkl'
 fit = Fitness()
 
 if __name__ == '__main__':
-  if len(sys.argv) > 1 and sys.argv[1] != 'test': dataset = 'train'
-  else: dataset = 'test'
+  if len(sys.argv) > 1 and sys.argv[1] != 'test':
+    dataset = 'train'
+  else:
+    dataset = 'test'
 
   train, test = get_candles_split()
   candles = train if dataset == 'train' else test
