@@ -367,6 +367,7 @@ class ChromosomeHandler:
     c.C_NAME = f"{prefix}{c.C_NAME}"
     return c
 
+
 if __name__ == "__main__":
   """Example usage"""
   from candle import get_candles

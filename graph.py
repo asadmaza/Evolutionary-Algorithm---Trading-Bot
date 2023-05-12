@@ -33,19 +33,19 @@ if __name__ == '__main__':
 
   # portfolio
   for n in [
-        "sortino50",
-        "sortino100",
-        "sortino200",
-        "portfolio50",
-        "portfolio100",
-        "portfolio200"]:
+      "sortino50",
+      "sortino100",
+      "sortino200",
+      "portfolio50",
+      "portfolio100",
+          "portfolio200"]:
     with open(f'results/best_{n}.pkl', 'rb') as f:
       best = Strategy.load_pickle_data(candles, pickle.load(f))
 
       if n == 'portfolio100':
         with open('results/best_chromosome_portfolio_test.txt', 'w') as fp:
           fp.write(f'{best.buy_chromosome}\n{best.sell_chromosome}')
-      if n=='sortino100':
+      if n == 'sortino100':
         with open('results/best_chromosome_sortino_test.txt', 'w') as fp:
           fp.write(f'{best.buy_chromosome}\n{best.sell_chromosome}')
 
@@ -53,6 +53,5 @@ if __name__ == '__main__':
           graph=True,
           fname=f'graphs/best_{n}_{dataset}.png',
           title=f'Best strategy {n} {("sortino =" + str(round(fit.get_fitness(best),4))) if "sortino" in n else ""}, {dataset} data')
-
 
   # print(f'{fit.get_fitness(best_sortino):.4f} {best_sortino.portfolio:.4f}, {best_sortino.buy_chromosome} {best_sortino.sell_chromosome}')

@@ -15,7 +15,7 @@ if __name__ == "__main__":
   candles = test_candles
 
   fit = Fitness()
-  
+
   for train in [True, False]:
     candles = train_candles if train else test_candles
 
@@ -25,9 +25,9 @@ if __name__ == "__main__":
         "sortino200",
         "portfolio50",
         "portfolio100",
-        "portfolio200"]:
-      
-      best_overall = None # best bots from training data, save to file
+            "portfolio200"]:
+
+      best_overall = None  # best bots from training data, save to file
 
       sortinos = []
       portfolios = []
@@ -37,13 +37,18 @@ if __name__ == "__main__":
           data = pickle.load(f)
 
         if 'portfolio' in n:
-          best = sorted([Strategy.load_pickle_data(candles, d) for d in data], key=lambda s: s.portfolio)[-1]
-          if (best_overall is None or best.portfolio > best_overall.portfolio): best_overall = best
-          
+          best = sorted([Strategy.load_pickle_data(candles, d)
+                        for d in data], key=lambda s: s.portfolio)[-1]
+          if (best_overall is None or best.portfolio > best_overall.portfolio):
+            best_overall = best
+
         else:
-          best = sorted([Strategy.load_pickle_data(candles, d) for d in data], key=lambda s: fit.get_fitness(s))[-1]
-          if (best_overall is None or fit.get_fitness(best) > fit.get_fitness(best_overall)): best_overall = best
-        
+          best = sorted([Strategy.load_pickle_data(candles, d)
+                        for d in data], key=lambda s: fit.get_fitness(s))[-1]
+          if (best_overall is None or fit.get_fitness(
+                  best) > fit.get_fitness(best_overall)):
+            best_overall = best
+
         portfolios.append(best.portfolio)
         sortinos.append(fit.get_fitness(best))
 
@@ -54,7 +59,7 @@ if __name__ == "__main__":
                 f'{n}, {sum(sortinos)/len(sortinos):.4f} {sum(portfolios)/len(sortinos):.4f}\n')
           else:
             f.write(f'{n}, {max(sortinos):.4f} {max(portfolios):.4f}\n')
-  
+
       if train:
         with open(f'results/best_{n}.pkl', "wb") as f:
-          pickle.dump(p:=best_overall.get_pickle_data(), f)
+          pickle.dump(p := best_overall.get_pickle_data(), f)
