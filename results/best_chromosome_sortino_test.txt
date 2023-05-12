@@ -1,0 +1,47 @@
+DNF expression (symbolic):
+	¬(A > C * B) ∨ (B > C * A)
+--------------------------------------------------
+DNF expression (non-symbolic):
+	not (self.buy_indicators[0][t] > self.buy_chromosome.constants[0] * self.candles[self.buy_chromosome.candle_names[0]][t])  or  (self.candles[self.buy_chromosome.candle_names[1]][t] > self.buy_chromosome.constants[1] * self.buy_indicators[1][t])
+--------------------------------------------------
+Constants (symbol C):
+	[0.927, 4.285]
+--------------------------------------------------
+Candle OHLCV values (symbol B):
+	['close', 'close']
+--------------------------------------------------
+Indicators (symbol A):
+  keltner_channel_hband
+  | Parameters:
+  | | window = 23
+  | | window_atr = 1
+
+  psar_up
+  | Parameters:
+
+
+(NOTE: candle value params are omitted from indicator parameter listings)
+
+DNF expression (symbolic):
+	¬(B > C * A) ∨ (A > C * B)
+--------------------------------------------------
+DNF expression (non-symbolic):
+	not (self.candles[self.sell_chromosome.candle_names[0]][t] > self.sell_chromosome.constants[0] * self.sell_indicators[0][t])  or  (self.sell_indicators[1][t] > self.sell_chromosome.constants[1] * self.candles[self.sell_chromosome.candle_names[1]][t])
+--------------------------------------------------
+Constants (symbol C):
+	[0.927, 4.285]
+--------------------------------------------------
+Candle OHLCV values (symbol B):
+	['close', 'close']
+--------------------------------------------------
+Indicators (symbol A):
+  keltner_channel_hband
+  | Parameters:
+  | | window = 12
+  | | window_atr = 6
+
+  psar_up
+  | Parameters:
+
+
+(NOTE: candle value params are omitted from indicator parameter listings)

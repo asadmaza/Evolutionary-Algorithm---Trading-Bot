@@ -15,10 +15,6 @@ if __name__ == "__main__":
   candles = test_candles
 
   fit = Fitness()
-
-  best_portfolio = None # best bots from training data, save to file
-  best_sortino = None
-
   
   for train in [True, False]:
     candles = train_candles if train else test_candles
@@ -30,6 +26,9 @@ if __name__ == "__main__":
         "portfolio50",
         "portfolio100",
         "portfolio200"]:
+      
+      best_overall = None # best bots from training data, save to file
+
       sortinos = []
       portfolios = []
 
@@ -39,11 +38,11 @@ if __name__ == "__main__":
 
         if 'portfolio' in n:
           best = sorted([Strategy.load_pickle_data(candles, d) for d in data], key=lambda s: s.portfolio)[-1]
-          if train and (best_portfolio is None or best.portfolio > best_portfolio.portfolio): best_portfolio = best
+          if (best_overall is None or best.portfolio > best_overall.portfolio): best_overall = best
           
         else:
           best = sorted([Strategy.load_pickle_data(candles, d) for d in data], key=lambda s: fit.get_fitness(s))[-1]
-          if train and (best_sortino is None or fit.get_fitness(best) > fit.get_fitness(best_sortino)): best_sortino = best
+          if (best_overall is None or fit.get_fitness(best) > fit.get_fitness(best_overall)): best_overall = best
         
         portfolios.append(best.portfolio)
         sortinos.append(fit.get_fitness(best))
@@ -56,10 +55,6 @@ if __name__ == "__main__":
           else:
             f.write(f'{n}, {max(sortinos):.4f} {max(portfolios):.4f}\n')
   
-  with open('results/best_portfolio.pkl', "wb") as f:
-    pickle.dump(p:=best_portfolio.get_pickle_data(), f)
-  with open('results/best_sortino.pkl', "wb") as f:
-    pickle.dump(s:=best_sortino.get_pickle_data(), f)
-
-  with open('results/best_chromosome.txt', 'w') as f:
-    f.write(f"{p['buy_chromosome']}\n{p['sell_chromosome']}")
+      if train:
+        with open(f'results/best_{n}.pkl', "wb") as f:
+          pickle.dump(p:=best_overall.get_pickle_data(), f)
