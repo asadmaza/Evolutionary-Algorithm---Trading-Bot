@@ -34,3 +34,9 @@ py graph.py [train | test]
 ```
 
 This generates the graphs of the trading patterns on the train or test data for the random strategy, simple strategy and the best strategy observed in the pkl files. Assumes the directories [sortino50, sortino100, sortino200, portfolio50, portfolio100, portfolio200] are present in the results directory.
+
+# Video Presentation Link
+
+This link provides access to anyone within UWA.
+
+https://uniwa-my.sharepoint.com/:v:/g/personal/22736341_student_uwa_edu_au/ET9jNrFiM1dMh8ye3lVI-RsBmyOrH71ppYJSaM31fH6eaQ?e=4AngUC
