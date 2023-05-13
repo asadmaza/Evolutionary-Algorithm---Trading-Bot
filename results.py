@@ -1,19 +1,15 @@
+"""
+Generates thhe average and best portfolio and fitness data from tournament results. Stores in csv.
+"""
+
 import pickle
 from strategy import Strategy
 from fitness import Fitness
 from matplotlib import pyplot as plt
+from candle import get_candles_split
 
 if __name__ == "__main__":
-  """
-  Testing
-  """
-
-  from candle import get_candles_split
-
   train_candles, test_candles = get_candles_split()
-
-  candles = test_candles
-
   fit = Fitness()
 
   for train in [True, False]:

@@ -1,5 +1,11 @@
+'''
+Graphs the trade patterns of the best agents from the results.
+Also saves the chromosomes of the best agents to txt file.
 
-from candle import get_candles_split, get_candles
+Usage: py graph.py [test | train]
+'''
+
+from candle import get_candles_split
 from random_strategy import RandomStrategy
 from simple_strategy import SimpleStrategy
 import pickle
@@ -53,5 +59,3 @@ if __name__ == '__main__':
           graph=True,
           fname=f'graphs/best_{n}_{dataset}.png',
           title=f'Best strategy {n} {("sortino =" + str(round(fit.get_fitness(best),4))) if "sortino" in n else ""}, {dataset} data')
-
-  # print(f'{fit.get_fitness(best_sortino):.4f} {best_sortino.portfolio:.4f}, {best_sortino.buy_chromosome} {best_sortino.sell_chromosome}')

@@ -30,7 +30,7 @@ This generates a summary of the results in the results directory as csv. By defa
 # Graph trade patterns
 
 ```console
-py graph.py
+py graph.py [train | test]
 ```
 
-This generates the graphs of the trading patterns on the test data for the random strategy, simple strategy and the best strategy observed in the pkl files. Assumes the directories [sortino50, sortino100, sortino200, portfolio50, portfolio100, portfolio200] are present in the results directory.
+This generates the graphs of the trading patterns on the train or test data for the random strategy, simple strategy and the best strategy observed in the pkl files. Assumes the directories [sortino50, sortino100, sortino200, portfolio50, portfolio100, portfolio200] are present in the results directory.
